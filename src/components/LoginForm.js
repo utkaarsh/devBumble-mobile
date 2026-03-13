@@ -1,113 +1,184 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
-  StyleSheet,
   Text,
   TextInput,
-  ToastAndroid,
   TouchableOpacity,
   View,
+  Pressable,
 } from "react-native";
-import { col8 } from "../utils/constants";
+import { Ionicons } from "@expo/vector-icons";
 import { path } from "../utils/path";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
 import { saveToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
 
-const LoginForm = () => {
-  const TOKEN_KEY = "auth_token";
-  const EXPIRY_KEY = "token_expiry";
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const LoginForm = ({ onNavigateToSignup }) => {
   const [email, setEmail] = useState("michael.martin3@example.in");
   const [password, setPassword] = useState("hitler123");
-  const [token, setToken] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [focusedField, setFocusedField] = useState(null);
 
   const authContext = useContext(AuthContext);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setErrorMessage("Please fill in all fields");
+      return;
+    }
     try {
       setLoading(true);
+      setErrorMessage("");
       const res = await axios.post(`${path}/login`, {
         emailId: email,
         password: password,
       });
-
-      await saveToken(res.data.token); // ✅ save to SecureStore
-      authContext.setUser(res.data); // ✅ update context → triggers navigation
-      console.log("Token set to storage successfully!!");
-    } catch (error) {
-      setErrorMessage(error.message);
+      await saveToken(res.data.token);
+      axios.defaults.headers.common["Authorization"] =
+        `Bearer ${res.data.token}`;
+      authContext.setUser(res.data);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Login failed";
+      setErrorMessage(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (text) => {
-    ToastAndroid.showWithGravity(text, ToastAndroid.SHORT, ToastAndroid.CENTER);
-  };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#F4F4F4",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    text: {
-      color: "#000",
-    },
-    inputField: {
-      width: col8,
-      backgroundColor: "white",
-      borderRadius: 15,
-      borderWidth: 2,
-      borderColor: "#3A3A3A",
-      marginBottom: 10,
-      paddingHorizontal: 10,
-      paddingVertical: 10,
-    },
-  });
-
   return (
-    <View style={styles.container} className="">
-      <View className="flex p-5 space-y-3 bg-[#D5D5D5] rounded-lg h-2/6 justify-evenly">
-        <TextInput
-          placeholder="Email"
-          style={styles.inputField}
-          onChangeText={(text) => setEmail(text)}
-          value={email}
-          keyboardType="email-address"
-          keyboardAppearance="dark"
-          textContentType="emailAddress"
-        />
-        <TextInput
-          style={styles.inputField}
-          placeholder="Password"
-          onChangeText={(text) => setPassword(text)}
-          value={password}
-          textContentType="password"
-        />
+    <View className="flex-1  items-center justify-center px-6">
+      {/* Card */}
+      <View className="w-full bg-[#1D232A] rounded-2xl p-7 border border-[#252C35]">
+        {/* Header */}
+        <View className="mb-7">
+          <Text className="text-[#EFF2F5] text-2xl font-bold mb-1">
+            Welcome back
+          </Text>
+          <Text className="text-[#5A6677] text-sm">Sign in to Dev Bumble</Text>
+        </View>
 
+        {/* Email field */}
+        <View className="mb-4">
+          <Text className="text-[#8695A4] text-xs font-semibold mb-2 uppercase tracking-widest">
+            Email
+          </Text>
+          <View
+            className={`flex-row items-center bg-[#15191E] rounded-xl px-4 border-2 ${
+              focusedField === "email" ? "border-[#4A9EFF]" : "border-[#2F3740]"
+            }`}
+          >
+            <Ionicons
+              name="mail-outline"
+              size={18}
+              color={focusedField === "email" ? "#4A9EFF" : "#5A6677"}
+              style={{ marginRight: 10 }}
+            />
+            <TextInput
+              className="flex-1 text-[#EFF2F5] text-base py-4"
+              placeholder="you@example.com"
+              placeholderTextColor="#3D4855"
+              onChangeText={setEmail}
+              value={email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+        </View>
+
+        {/* Password field */}
+        <View className="mb-4">
+          <Text className="text-[#8695A4] text-xs font-semibold mb-2 uppercase tracking-widest">
+            Password
+          </Text>
+          <View
+            className={`flex-row items-center bg-[#15191E] rounded-xl px-4 border-2 ${
+              focusedField === "password"
+                ? "border-[#4A9EFF]"
+                : "border-[#2F3740]"
+            }`}
+          >
+            <Ionicons
+              name="lock-closed-outline"
+              size={18}
+              color={focusedField === "password" ? "#4A9EFF" : "#5A6677"}
+              style={{ marginRight: 10 }}
+            />
+            <TextInput
+              className="flex-1 text-[#EFF2F5] text-base py-4"
+              placeholder="Your password"
+              placeholderTextColor="#3D4855"
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry={!showPassword}
+              onFocus={() => setFocusedField("password")}
+              onBlur={() => setFocusedField(null)}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              hitSlop={8}
+              className="p-1 ml-2"
+            >
+              <Ionicons
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                size={20}
+                color="#5A6677"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Error message */}
+        {errorMessage ? (
+          <View className="flex-row items-center bg-[#3D0015] rounded-lg px-3 py-2 mb-4 border border-[#FF5E7D33] gap-2">
+            <Ionicons name="alert-circle-outline" size={14} color="#FF5E7D" />
+            <Text className="text-[#FF5E7D] text-sm flex-1">
+              {errorMessage}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Login button */}
         <TouchableOpacity
+          className={`rounded-xl py-4 flex-row items-center justify-center mt-1 bg-[#4A9EFF] ${
+            loading ? "opacity-60" : "opacity-100"
+          }`}
           onPress={handleLogin}
-          className="bg-[#3A3A3A] self-center gap-3 flex-row items-center justify-center w-64 py-2 rounded-lg"
+          disabled={loading}
+          activeOpacity={0.85}
         >
-          {loading && <ActivityIndicator color={"#fff"} size={20} />}
-          <Text className="text-white text-xl ">
-            {loading ? "Signing in.." : "Login"}
+          {loading && (
+            <ActivityIndicator
+              color="#fff"
+              size={18}
+              style={{ marginRight: 8 }}
+            />
+          )}
+          <Text className="text-white text-base font-bold tracking-wide">
+            {loading ? "Signing in..." : "Sign In"}
           </Text>
         </TouchableOpacity>
 
-        {
-          errorMessage && showToast(errorMessage)
-          // <Text className="text-[#EC3826] text-sm text-center p-1">
-          //   {errorMessage}
-          // </Text>
-        }
+        {/* Divider */}
+        <View className="flex-row items-center my-6 gap-3">
+          <View className="flex-1 h-px bg-[#252C35]" />
+          <Text className="text-[#3D4855] text-sm">or</Text>
+          <View className="flex-1 h-px bg-[#252C35]" />
+        </View>
+
+        {/* Signup link */}
+        <Pressable
+          className="flex-row justify-center items-center"
+          onPress={() => onNavigateToSignup?.()}
+        >
+          <Text className="text-[#5A6677] text-sm">
+            Don't have an account?{" "}
+          </Text>
+          <Text className="text-[#4A9EFF] text-sm font-semibold">Sign Up</Text>
+        </Pressable>
       </View>
     </View>
   );

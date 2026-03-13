@@ -9,9 +9,8 @@ function HomeScreen() {
   return (
     <Screen style={styles.container}>
       <Text className="text-3xl font-bold text-center uppercase">
-        React Native Assignment
+        Chat Screen
       </Text>
-     
     </Screen>
   );
 }

@@ -9,19 +9,19 @@ const AuthNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        cardStyle: { backgroundColor: "#fff" },
+        sceneStyle: { backgroundColor: "#1D232A" },
+        headerStyle: { backgroundColor: "transparent" },
         headerBackground: () => (
           <View
             style={{
               flex: 1,
-              backgroundColor: "#848484",
+              backgroundColor: "#15191E",
               borderBottomLeftRadius: 20,
               borderBottomRightRadius: 20,
-              shadowRadius: 10,
+              overflow: "hidden",
             }}
           />
         ),
-
         headerTitleAlign: "center",
         headerTitle: () => (
           <View className="flex-row items-center justify-around space-x-3">
@@ -30,12 +30,13 @@ const AuthNavigator = () => {
               style={{ width: 40, height: 40 }}
               resizeMode="contain"
             />
-            <Text className="text-2xl text-white ml-3 font-bold">
+            <Text className="text-4xl text-[#A6ADBB] uppercase ml-3 font-bold">
               Dev Bumble
             </Text>
           </View>
         ),
-        headerShadowVisible: true,
+        headerShadowVisible: false,
+        tabBarStyle: { position: "absolute" },
       }}
     >
       <Stack.Screen name="login" component={Authentication} />

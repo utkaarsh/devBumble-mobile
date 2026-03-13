@@ -19,6 +19,7 @@ import axios from "axios";
 import { path } from "../utils/path";
 import { deleteToken, getToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
+import Profile from "../screens/Profile";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
@@ -157,7 +158,7 @@ export const TabNavigator = () => {
                 style={{ width: 40, height: 40 }}
                 resizeMode="contain"
               />
-              <Text className="text-2xl text-white ml-3 font-bold">
+              <Text className="text-4xl text-[#A6ADBB] uppercase ml-3 font-bold">
                 Dev Bumble
               </Text>
             </View>
@@ -178,14 +179,18 @@ export const TabNavigator = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ size, color }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
+            <Ionicons name="chatbubble-outline" size={24} color={color} />
           ),
         }}
       />
       <Tab.Screen
         name="Auth"
-        component={Authentication}
-        options={{ tabBarIcon: ({ color }) => <StarIcon color={color} /> }}
+        component={Profile}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person" size={24} color={color} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );
