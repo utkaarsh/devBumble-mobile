@@ -1,183 +1,148 @@
-import {
-  StyleSheet,
-  View,
-  Animated,
-  PanResponder,
-  Text,
-  ActivityIndicator,
-} from "react-native";
-
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ACTION_OFFSET,
-  CARD_HEIGHT,
-  mockData,
-  OUT_OF_SCREEN,
-} from "../utils/constants";
+import { Animated } from "react-native";
 import Screen from "../components/Screen";
 import FooterButton from "../components/FooterButton";
 import UserCard from "../components/UserCard";
-import { useSelector } from "react-redux";
 import useFeedData from "../hooks/useFeedData";
 
 export default function TinderPage() {
-  const [feedData, setFeedData] = useState(mockData);
-  const swipe = useRef(new Animated.ValueXY()).current;
+  const [feedData, setFeedData] = useState([]);
   const tiltSign = useRef(new Animated.Value(1)).current;
   const topCardRef = useRef(null);
-  const { data, isLoading, error } = useFeedData();
 
-  console.log("Fetched feed data :: ", data);
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFeedData();
 
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, { dx, dy, y0 }) => {
-      swipe.setValue({ x: dx, y: dy });
-      tiltSign.setValue(y0 > CARD_HEIGHT / 2 ? 1 : -1);
-    },
-    onPanResponderRelease: (_, { dx, dy }) => {
-      const direction = Math.sign(dx);
-      const isActionActive = Math.abs(dx) > ACTION_OFFSET;
+  // ✅ Flatten all pages — guard every level
+  useEffect(() => {
+    if (!data?.pages) return;
 
-      if (isActionActive) {
-        console.log("isActionActive ", isActionActive, " ", direction);
-
-        Animated.timing(swipe, {
-          duration: 200,
-          toValue: {
-            x: direction * OUT_OF_SCREEN,
-            y: dy,
-          },
-          useNativeDriver: true,
-        }).start(justRemove);
-      } else {
-        console.log("Not active");
-
-        Animated.spring(swipe, {
-          toValue: {
-            x: 0,
-            y: 0,
-          },
-          useNativeDriver: true,
-          friction: 5,
-        }).start();
-      }
-    },
-  });
-
-  const justRemove = () => {
-    console.log("Remove");
-
-    setFeedData((prevState) => {
-      const newState = prevState.slice(1);
-      console.log(
-        "Updated state: ",
-        newState.map((x) => x.firstName + " " + x.lastName),
-      );
-      return newState;
+    const allUsers = data.pages.flatMap((page) => {
+      // ✅ page.data could be undefined if backend shape changes
+      if (!Array.isArray(page?.data)) return [];
+      return page.data;
     });
-    swipe.setValue({ x: 0, y: 0 }); // ✅ Reset swipe after removing
-  };
+
+    // ✅ Deduplicate by _id in case of refetch overlap
+    const seen = new Set();
+    const unique = allUsers.filter((user) => {
+      if (!user?._id || seen.has(user._id)) return false;
+      seen.add(user._id);
+      return true;
+    });
+
+    setFeedData(unique);
+  }, [data]);
+
+  // ✅ Prefetch next page when running low
+  useEffect(() => {
+    if (
+      Array.isArray(feedData) &&
+      feedData.length <= 2 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [feedData.length, hasNextPage, isFetchingNextPage]);
 
   const removeTopCard = useCallback(() => {
-    console.log("Invoked Remove user cards");
-    // setFeedData((prevState) => prevState.slice(1));
-    setFeedData((prevState) => {
-      const newState = prevState.slice(1);
-      console.log(
-        "Updated state: ",
-        newState.map((x) => x.firstName + " " + x.lastName),
-      );
-      return newState;
-    });
+    setFeedData((prev) => (Array.isArray(prev) ? prev.slice(1) : []));
+  }, []);
 
-    // swipe.setValue({ x: 0, y: 0 });
-  }, [swipe]);
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#1D232A",
-      alignItems: "center",
-      zIndex: 10,
-    },
-  });
-
-  const handleChoice = useCallback(
-    (direction) => {
-      console.log("Hell yeah");
-      topCardRef.current?.swipeOut(direction);
-
-      Animated.timing(swipe.x, {
-        toValue: direction * OUT_OF_SCREEN,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(removeTopCard);
-    },
-    [removeTopCard, swipe.x],
-  );
-
-  useEffect(() => {
-    if (feedData?.length === 0) {
-      setFeedData(mockData);
-    }
-  }, [feedData]);
+  const handleChoice = useCallback((direction) => {
+    topCardRef.current?.swipeOut(direction);
+  }, []);
 
   if (isLoading) {
-    return <ActivityIndicator size="large" color="#fff" />;
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#4A9EFF" />
+      </View>
+    );
   }
 
   if (error) {
     return (
-      <Text className="text-red-500 text-center text-lg p-4 mt-10">
-        Error loading feed
-      </Text>
+      <View style={styles.centered}>
+        <Text className="text-red-500 text-center text-lg p-4">
+          Error loading feed
+        </Text>
+      </View>
     );
   }
-  if (!feedData) return;
+
+  if (
+    Array.isArray(feedData) &&
+    feedData.length === 0 &&
+    !hasNextPage &&
+    !isLoading
+  ) {
+    return (
+      <View style={styles.centered}>
+        <Text className="text-white text-xl font-bold">
+          You've seen everyone!
+        </Text>
+        <Text className="text-[#5A6677] text-sm mt-2">
+          Check back later for new profiles
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <Screen style={styles.container}>
-      {/* <View className="flex-row items-center flex-wrap space-x-2 px-2 py-2">
-        {feedData
-          ?.map((x, i) => (
-            <Text
-              key={i}
-              className="text-center text-yellow-400 font-bold p-2 text-wrap"
-            >
-              {x.firstName}
-            </Text>
-          ))
+      {Array.isArray(feedData) &&
+        feedData
+          .map((user, index) => {
+            if (!user?._id) return null; // ✅ guard malformed entries
+            const isFirst = index === 0;
+            return (
+              <UserCard
+                key={user._id}
+                user={user}
+                isFirst={isFirst}
+                index={index}
+                tiltSign={tiltSign}
+                onRemove={removeTopCard}
+                ref={isFirst ? topCardRef : null}
+              />
+            );
+          })
           .reverse()}
-      </View> */}
 
-      {feedData
-        ?.map((user, index) => {
-          const isFirst = index === 0;
-          // const isFirst = user._id === feedData[0]?._id;
-
-          const dragHandlers = isFirst ? panResponder.panHandlers : {};
-
-          return (
-            <View key={user?._id}>
-              {
-                <UserCard
-                  user={user}
-                  isFirst={isFirst}
-                  index={index}
-                  // swipe={swipe}
-                  // {...dragHandlers}
-                  tiltSign={tiltSign}
-                  onRemove={removeTopCard}
-                  ref={isFirst ? topCardRef : null}
-                />
-              }
-            </View>
-          );
-        })
-        .reverse()}
+      {isFetchingNextPage && (
+        <ActivityIndicator
+          size="small"
+          color="#4A9EFF"
+          style={{ position: "absolute", bottom: 120 }}
+        />
+      )}
 
       <FooterButton handleChoice={handleChoice} />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#1D232A",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: "#1D232A",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+});

@@ -24,12 +24,12 @@ const AuthNavigator = () => {
         ),
         headerTitleAlign: "center",
         headerTitle: () => (
-          <View className="flex-row items-center justify-around space-x-3">
-            <Image
+          <View className="flex-row items-center justify-start space-x-3">
+            {/* <Image
               source={require("../../assets/images/devBumble.png")}
               style={{ width: 40, height: 40 }}
               resizeMode="contain"
-            />
+            /> */}
             <Text className="text-4xl text-[#A6ADBB] uppercase ml-3 font-bold">
               Dev Bumble
             </Text>

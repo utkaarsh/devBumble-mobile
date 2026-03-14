@@ -18,7 +18,7 @@ function RoundButton({ name, size, color, onPress }) {
         useNativeDriver: true,
       }).start();
     },
-    [scale]
+    [scale],
   );
 
   return (
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   container: {
     width: 70,
     height: 70,
-    backgroundColor: "#fff",
+    backgroundColor: "#15191E",
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",

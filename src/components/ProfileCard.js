@@ -9,7 +9,7 @@ import H1 from "./H1";
 import Chips from "./Chips";
 import { formatDate } from "../utils/utility";
 
-const ViewProfile = ({ data }) => {
+const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
   const user = data;
 
   const sections = [
@@ -40,9 +40,11 @@ const ViewProfile = ({ data }) => {
   ];
 
   return (
-    <ScrollView className="p-2">
+    <ScrollView className={`p-2 ${className}`}>
       {/* PROFILE HEADER */}
-      <View className="bg-[#15191E] p-4 rounded-lg mt-10 mx-2 flex-row items-start ">
+      <View
+        className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-4 rounded-2xl mt-10 mx-2 flex-row items-start`}
+      >
         <View className="w-24 h-24 overflow-hidden bg-gray-500 rounded-full mr-4 items-center justify-center">
           {user?.photoUrl ? (
             <Image
@@ -60,7 +62,9 @@ const ViewProfile = ({ data }) => {
             {user?.firstName} {user?.lastName}
           </Text>
 
-          <Text className="text-gray-400 text-base">{user?.emailId}</Text>
+          {user.emailId && (
+            <Text className="text-gray-400 text-base">{user?.emailId}</Text>
+          )}
 
           <View className="flex-row gap-2">
             <Text className="text-gray-400 text-base">{user?.gender},</Text>
@@ -69,6 +73,17 @@ const ViewProfile = ({ data }) => {
         </View>
       </View>
 
+      {/* SKILLS */}
+      <Card>
+        <H1>Technical Skills</H1>
+        <Chips items={user?.skills || []} />
+      </Card>
+
+      {/* INTERESTS */}
+      <Card>
+        <H1>Interests</H1>
+        <Chips items={user?.interests || []} />
+      </Card>
       {/* ABOUT + EXPERIENCE + LOCATION + MEMBER SINCE */}
       <Card>
         {sections.map((section, index) => (
@@ -82,18 +97,6 @@ const ViewProfile = ({ data }) => {
             <H6>{section.value}</H6>
           </View>
         ))}
-      </Card>
-
-      {/* SKILLS */}
-      <Card>
-        <H1>Technical Skills</H1>
-        <Chips items={user?.skills || []} />
-      </Card>
-
-      {/* INTERESTS */}
-      <Card>
-        <H1>Interests</H1>
-        <Chips items={user?.interests || []} />
       </Card>
     </ScrollView>
   );

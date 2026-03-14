@@ -152,14 +152,14 @@ export const TabNavigator = () => {
         ),
         headerTitleAlign: "center",
         headerTitle: () => (
-          <View className="flex-row items-center justify-between w-full space-x-3">
-            <View />
+          <View className="flex-row mt-2 items-center justify-between w-full space-x-3">
+            {/* <View /> */}
             <View className="flex-row items-center justify-around space-x-3">
-              <Image
+              {/* <Image
                 source={require("../../assets/images/devBumble.png")}
                 style={{ width: 40, height: 40 }}
                 resizeMode="contain"
-              />
+              /> */}
               <Text className="text-4xl text-[#A6ADBB] uppercase ml-3 font-bold">
                 Dev Bumble
               </Text>

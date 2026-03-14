@@ -3,17 +3,9 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
-import {
-  Animated,
-  Image,
-  PanResponder,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
-import { LinearGradient } from "expo-linear-gradient";
+import { Animated, PanResponder, StyleSheet } from "react-native";
 import Choice from "./Choice";
 import {
   ACTION_OFFSET,
@@ -22,87 +14,122 @@ import {
   OUT_OF_SCREEN,
   VERTICAL_MARGIN,
 } from "../utils/constants";
+import ViewProfile from "./ProfileCard";
+import { useSendRequest } from "../hooks/useSendRequest";
 
 const UserCard = forwardRef(function UserCard(
-  { user, isFirst, index, tiltSign, onRemove },
+  { user, isFirst, tiltSign, onRemove },
   ref,
 ) {
-  if (!user) return null;
-
-  const { photoUrl, firstName, lastName, age, skills } = user;
-
   const swipe = useRef(new Animated.ValueXY()).current;
-
-  // ✅ Tracks if this card has been flung off screen
   const isSwiped = useRef(false);
+  const isSwipingHorizontally = useRef(false);
 
-  // ✅ Expose swipeOut so parent (FooterButton) can trigger it
-  useImperativeHandle(ref, () => ({
-    swipeOut(direction) {
-      Animated.timing(swipe, {
-        toValue: { x: direction * OUT_OF_SCREEN, y: 0 },
-        duration: 400,
-        useNativeDriver: true,
-      }).start(() => {
-        isSwiped.current = true;
-        onRemove();
-      });
+  const { mutate: sendRequest } = useSendRequest();
+
+  // direction: 1 = right = interested, -1 = left = ignored
+  const handleSwipeComplete = useCallback(
+    (direction) => {
+      const status = direction === 1 ? "interested" : "ignored";
+      sendRequest({ status, toUserId: user._id });
+      isSwiped.current = true;
+      onRemove();
     },
-  }));
+    [user._id, onRemove, sendRequest],
+  );
 
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, { dx, dy }) => {
-      swipe.setValue({ x: dx, y: dy });
-    },
-    onPanResponderRelease: (_, { dx, dy }) => {
-      const isActionActive = Math.abs(dx) > ACTION_OFFSET;
-      const direction = Math.sign(dx);
-
-      if (isActionActive) {
+  useImperativeHandle(
+    ref,
+    () => ({
+      swipeOut(direction) {
         Animated.timing(swipe, {
-          toValue: { x: direction * OUT_OF_SCREEN, y: dy },
-          duration: 200,
+          toValue: { x: direction * OUT_OF_SCREEN, y: 0 },
+          duration: 400,
           useNativeDriver: true,
-        }).start(() => {
-          // ✅ Mark swiped BEFORE onRemove so the card
-          //    returns null on the re-render triggered by state change
-          isSwiped.current = true;
-          onRemove();
-          // ❌ Removed swipe.setValue({ x: 0, y: 0 }) — this was the flash
-        });
-      } else {
-        Animated.spring(swipe, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: true,
-        }).start();
-      }
-    },
-  });
+        }).start(() => handleSwipeComplete(direction));
+      },
+    }),
+    [handleSwipeComplete],
+  );
 
-  // ✅ If already swiped away, bail out before rendering anything
-  if (isSwiped.current) return null;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onStartShouldSetPanResponderCapture: () => false,
 
-  const rotate = Animated.multiply(swipe.x, tiltSign).interpolate({
-    inputRange: [-ACTION_OFFSET, 0, ACTION_OFFSET],
-    outputRange: ["8deg", "0deg", "-8deg"],
-  });
+        onMoveShouldSetPanResponder: (_, { dx, dy }) => {
+          const isHorizontal = Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8;
+          isSwipingHorizontally.current = isHorizontal;
+          return isHorizontal;
+        },
 
-  const likeOpacity = swipe.x.interpolate({
-    inputRange: [25, ACTION_OFFSET],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
-  });
+        onMoveShouldSetPanResponderCapture: (_, { dx, dy }) =>
+          Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8,
 
-  const nopeOpacity = swipe.x.interpolate({
-    inputRange: [-ACTION_OFFSET, -25],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
+        onPanResponderMove: (_, { dx, dy }) => {
+          swipe.setValue({ x: dx, y: dy });
+        },
 
-  const animatedCardStyle = {
-    transform: [...swipe.getTranslateTransform(), { rotate }],
-  };
+        onPanResponderRelease: (_, { dx, dy }) => {
+          isSwipingHorizontally.current = false;
+          const isActionActive = Math.abs(dx) > ACTION_OFFSET;
+          const direction = Math.sign(dx);
+
+          if (isActionActive) {
+            Animated.timing(swipe, {
+              toValue: { x: direction * OUT_OF_SCREEN, y: dy },
+              duration: 200,
+              useNativeDriver: true,
+            }).start(() => handleSwipeComplete(direction));
+          } else {
+            Animated.spring(swipe, {
+              toValue: { x: 0, y: 0 },
+              useNativeDriver: true,
+            }).start();
+          }
+        },
+
+        onPanResponderTerminationRequest: () => false,
+      }),
+    [handleSwipeComplete],
+  );
+
+  const rotate = useMemo(
+    () =>
+      Animated.multiply(swipe.x, tiltSign).interpolate({
+        inputRange: [-ACTION_OFFSET, 0, ACTION_OFFSET],
+        outputRange: ["8deg", "0deg", "-8deg"],
+      }),
+    [tiltSign],
+  );
+
+  const likeOpacity = useMemo(
+    () =>
+      swipe.x.interpolate({
+        inputRange: [25, ACTION_OFFSET],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
+      }),
+    [],
+  );
+
+  const nopeOpacity = useMemo(
+    () =>
+      swipe.x.interpolate({
+        inputRange: [-ACTION_OFFSET, -25],
+        outputRange: [1, 0],
+        extrapolate: "clamp",
+      }),
+    [],
+  );
+
+  const animatedCardStyle = useMemo(
+    () => ({
+      transform: [...swipe.getTranslateTransform(), { rotate }],
+    }),
+    [rotate],
+  );
 
   const renderChoice = useCallback(
     () => (
@@ -130,23 +157,19 @@ const UserCard = forwardRef(function UserCard(
     [likeOpacity, nopeOpacity],
   );
 
+  if (!user) return null;
+  if (isSwiped.current) return null;
+
   return (
     <Animated.View
       style={[styles.container, isFirst && animatedCardStyle]}
       {...(isFirst ? panResponder.panHandlers : {})}
     >
-      <Image source={{ uri: photoUrl }} style={styles.image} />
-      <LinearGradient
-        colors={["transparent", "rgba(0, 0, 0, 0.9)"]}
-        style={styles.gradient}
+      <ViewProfile
+        data={user}
+        isFeedCard
+        isSwipingHorizontally={isSwipingHorizontally}
       />
-      <View style={styles.infoContainer}>
-        <Text style={styles.textTitle}>
-          {firstName} {lastName}, {age}
-        </Text>
-        <Text style={styles.text}>{skills.join(", ")}</Text>
-      </View>
-
       {isFirst && renderChoice()}
     </Animated.View>
   );
@@ -161,18 +184,10 @@ const styles = StyleSheet.create({
     margin: 10,
     alignSelf: "center",
     borderRadius: 35,
-    overflow: "hidden",
+    overflow: "scroll",
+    backgroundColor: "#000",
     justifyContent: "flex-end",
     zIndex: 20,
-  },
-  infoContainer: {
-    padding: 10,
-    bottom: 10,
-    height: 100,
-    marginLeft: 10,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
   },
   likeContainer: {
     left: 45,
@@ -181,29 +196,6 @@ const styles = StyleSheet.create({
   nopeContainer: {
     right: 45,
     transform: [{ rotate: "30deg" }],
-  },
-  gradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 160,
-    borderRadius: 35,
-  },
-  text: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  textTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  image: {
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-    zIndex: -20,
   },
   choiceContainer: {
     position: "absolute",
