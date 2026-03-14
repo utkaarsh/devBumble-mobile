@@ -78,18 +78,14 @@ export const data = [
   },
 ];
 
-// Store token securely
-const storeToken = async (token) => {
-  await SecureStore.setItemAsync("auth_token", token);
-};
+export const formatDate = (isoDate) => {
+  if (!isoDate) return "";
 
-// Get token securely
-const getToken = async () => {
-  const token = await SecureStore.getItemAsync("auth_token");
-  return token;
-};
+  const date = new Date(isoDate);
 
-// Remove token
-const removeToken = async () => {
-  await SecureStore.deleteItemAsync("auth_token");
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 };

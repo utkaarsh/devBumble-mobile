@@ -1,22 +1,33 @@
-import { StyleSheet, View, Animated, PanResponder, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Animated,
+  PanResponder,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ACTION_OFFSET,
   CARD_HEIGHT,
-  data,
+  mockData,
   OUT_OF_SCREEN,
 } from "../utils/constants";
 import Screen from "../components/Screen";
 import FooterButton from "../components/FooterButton";
 import UserCard from "../components/UserCard";
 import { useSelector } from "react-redux";
+import useFeedData from "../hooks/useFeedData";
 
 export default function TinderPage() {
-  const [feedData, setFeedData] = useState(data);
+  const [feedData, setFeedData] = useState(mockData);
   const swipe = useRef(new Animated.ValueXY()).current;
   const tiltSign = useRef(new Animated.Value(1)).current;
   const topCardRef = useRef(null);
+  const { data, isLoading, error } = useFeedData();
+
+  console.log("Fetched feed data :: ", data);
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
@@ -107,16 +118,22 @@ export default function TinderPage() {
   );
 
   useEffect(() => {
-    console.log(
-      "Feed  logss ",
-      feedData?.map((x) => x.firstName + " " + x.lastName),
-    );
-
     if (feedData?.length === 0) {
-      setFeedData(data);
+      setFeedData(mockData);
     }
   }, [feedData]);
 
+  if (isLoading) {
+    return <ActivityIndicator size="large" color="#fff" />;
+  }
+
+  if (error) {
+    return (
+      <Text className="text-red-500 text-center text-lg p-4 mt-10">
+        Error loading feed
+      </Text>
+    );
+  }
   if (!feedData) return;
 
   return (

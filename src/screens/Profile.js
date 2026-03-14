@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import Screen from "../components/Screen";
-import { Text } from "react-native";
+import AuthContext from "../auth/context";
+import ProfileCard from "../components/ProfileCard";
 
 const Profile = () => {
+  const { user } = useContext(AuthContext);
+  console.log("Profile of user :: ", user);
+
   return (
-    <Screen className="flex-1 p-2">
-      <Text className="text-white text-2xl mt-20 font-bold text-center">
-        Profile Screen
-      </Text>
+    <Screen className="flex-1 p-2 flex gap-5">
+      <ProfileCard data={user} />
     </Screen>
   );
 };

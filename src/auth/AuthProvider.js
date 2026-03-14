@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.get(`${path}/profile/view`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("User data  ::: ", res.data);
       setUser(res.data);
     } catch (error) {
       console.log("Catch Error :: ", error.response?.data || error.message);

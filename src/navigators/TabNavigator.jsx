@@ -131,6 +131,8 @@ const HeaderMenu = () => {
 };
 
 export const TabNavigator = () => {
+  const { user } = useContext(AuthContext);
+
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
@@ -175,7 +177,7 @@ export const TabNavigator = () => {
         options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
       />
       <Tab.Screen
-        name="Home"
+        name="Chat"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ size, color }) => (
@@ -184,11 +186,22 @@ export const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Auth"
+        name="Profile"
         component={Profile}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
+            <View className="w-8 h-8 overflow-hidden bg-gray-500 rounded-full  text-white flex items-center justify-center">
+              {user?.photoUrl ? (
+                <Image
+                  source={{ uri: user?.photoUrl }}
+                  className="w-full h-auto"
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Ionicons name="person" size={24} color={color} />
+              )}
+            </View>
           ),
         }}
       />

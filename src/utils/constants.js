@@ -29,7 +29,7 @@ export const CARD_HEIGHT = windowHeight * 0.7;
 export const CARD_WIDTH = windowWidth * 0.85;
 export const OUT_OF_SCREEN = windowWidth + 0.9 * windowWidth;
 
-export const data = [
+export const mockData = [
   {
     _id: "67b5a7cdcc9d6b8add7a670c",
     about:
