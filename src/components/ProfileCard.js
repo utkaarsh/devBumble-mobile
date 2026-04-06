@@ -11,6 +11,7 @@ import { formatDate } from "../utils/utility";
 
 const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
   const user = data;
+  console.log("Data ", data);
 
   const sections = [
     {
@@ -40,7 +41,7 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
   ];
 
   return (
-    <ScrollView className={`p-2 ${className}`}>
+    <ScrollView className={`p-2 mb-24 ${className}`}>
       {/* PROFILE HEADER */}
       <View
         className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-4 rounded-2xl mt-10 mx-2 flex-row items-start`}
@@ -63,12 +64,18 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
           </Text>
 
           {user.emailId && (
-            <Text className="text-gray-400 text-base">{user?.emailId}</Text>
+            <Text className="text-gray-400 text-base">
+              {user?.emailId ?? "Email not available"}
+            </Text>
           )}
 
           <View className="flex-row gap-2">
-            <Text className="text-gray-400 text-base">{user?.gender},</Text>
-            <Text className="text-gray-400 text-base">{user?.age}</Text>
+            <Text className="text-gray-400 text-base">
+              {user?.gender ?? "Gender not available"},
+            </Text>
+            <Text className="text-gray-400 text-base">
+              {user?.age ?? "Age not available"}
+            </Text>
           </View>
         </View>
       </View>

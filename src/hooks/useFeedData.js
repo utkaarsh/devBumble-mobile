@@ -1,12 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { path } from "../utils/path";
+import api from "../utils/api";
 
 const DEFAULT_LIMIT = 10;
 
 const fetchFeed = async ({ pageParam = 1 }) => {
-  const res = await axios.get(
-    `${path}/user/feed/?page=${pageParam}&limit=${DEFAULT_LIMIT}`,
+  console.log("Hitting");
+  const res = await api.get(
+    `/user/feed/?page=${pageParam}&limit=${DEFAULT_LIMIT}`,
   );
   return res.data;
 };

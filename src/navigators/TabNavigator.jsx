@@ -20,109 +20,165 @@ import { path } from "../utils/path";
 import { deleteToken, getToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
 import Profile from "../screens/Profile";
+import { useNavigation } from "@react-navigation/native";
+import api from "../utils/api";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
+  const navigation = useNavigation();
   const [visible, setVisible] = useState(false);
-  const MENU_ITEMS = [
-    { label: "Profile", icon: "person-outline" },
-    { label: "Settings", icon: "settings-outline" },
-    { label: "Matches", icon: "heart-outline" },
-    { label: "Logout", icon: "log-out-outline", onClick: handleLogout },
-  ];
 
+  // ✅ ACTIONS
   const handleLogout = async () => {
     try {
-      const token = await getToken(); // ✅ token fetched correctly
-      await axios.post(
-        `${path}/logout`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await api.post("/logout"); // token auto attached via interceptor
     } catch (err) {
       console.error("Logout error:", err.message);
     } finally {
-      await deleteToken(); // ✅ clears token + user from context regardless of API result
+      await deleteToken();
       setUser(null);
     }
   };
 
-  const handlePress = (item) => {
+  // ✅ MENU CONFIG (clean + scalable)
+  const MENU_ITEMS = [
+    {
+      label: "Profile",
+      icon: "person-outline",
+      action: () => navigation.navigate("Profile"),
+    },
+    // {
+    //   label: "Settings",
+    //   icon: "settings-outline",
+    //   action: () => navigation.navigate("Settings"),
+    // },
+    {
+      label: "Matches",
+      icon: "heart-outline",
+      action: () =>
+        navigation.navigate("Feed", {
+          screen: "Matches",
+          params: {
+            listType: "matches",
+            apiUrl: "/user/connections",
+          },
+        }),
+    },
+    {
+      label: "Requests Recieved",
+      icon: "people-outline",
+      action: () =>
+        navigation.navigate("Feed", {
+          screen: "Requests",
+          params: {
+            listType: "requests",
+            apiUrl: "/user/requests/recieved",
+          },
+        }),
+    },
+    {
+      label: "Requests Sent",
+      icon: "people-outline",
+      action: () =>
+        navigation.navigate("Feed", {
+          screen: "Requests",
+          params: {
+            listType: "requests",
+            apiUrl: "/user/requests/sent",
+          },
+        }),
+    },
+    {
+      label: "Logout",
+      icon: "log-out-outline",
+      action: handleLogout,
+      danger: true,
+    },
+  ];
+
+  // ✅ HANDLE CLICK
+  const handlePress = async (item) => {
     setVisible(false);
-    if (item.label === "Logout") handleLogout();
-    // add other navigation cases here
+    await item.action?.();
   };
 
+  // ✅ STYLES (moved out = cleaner + performant)
+  const styles = {
+    dropdown: {
+      position: "absolute",
+      top: 70,
+      right: 16,
+      backgroundColor: "#1D232A",
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: "#2F3740",
+      minWidth: 180,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      elevation: 10,
+      overflow: "hidden",
+    },
+    item: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+      gap: 12,
+    },
+    border: {
+      borderBottomWidth: 1,
+      borderBottomColor: "#252C35",
+    },
+    text: {
+      color: "#EFF2F5",
+      fontSize: 14,
+      fontWeight: "500",
+    },
+  };
   return (
     <View>
-      {/* Hamburger trigger */}
+      {/* Trigger */}
       <TouchableOpacity onPress={() => setVisible(true)} hitSlop={10}>
         <Ionicons name="menu" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {/* Dropdown modal */}
+      {/* Modal */}
       <Modal
         transparent
         visible={visible}
         animationType="fade"
         onRequestClose={() => setVisible(false)}
       >
-        {/* Backdrop — tap outside to close */}
         <Pressable style={{ flex: 1 }} onPress={() => setVisible(false)}>
-          {/* Dropdown card */}
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            style={{
-              position: "absolute",
-              top: 70, // just below the header
-              right: 16,
-              backgroundColor: "#1D232A",
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: "#2F3740",
-              minWidth: 180,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.4,
-              shadowRadius: 16,
-              elevation: 10,
-              overflow: "hidden",
-            }}
+            style={styles.dropdown}
           >
-            {MENU_ITEMS.map((item, index) => (
-              <TouchableOpacity
-                key={item.label}
-                onPress={() => {
-                  handlePress(item);
-                }}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 13,
-                  paddingHorizontal: 16,
-                  borderBottomWidth: index < MENU_ITEMS.length - 1 ? 1 : 0,
-                  borderBottomColor: "#252C35",
-                  gap: 12,
-                }}
-              >
-                <Ionicons
-                  name={item.icon}
-                  size={18}
-                  color={item.label === "Logout" ? "#FF5E7D" : "#8695A4"}
-                />
-                <Text
-                  style={{
-                    color: item.label === "Logout" ? "#FF5E7D" : "#EFF2F5",
-                    fontSize: 14,
-                    fontWeight: "500",
-                  }}
+            {MENU_ITEMS.map((item, index) => {
+              const isDanger = item.danger;
+
+              return (
+                <TouchableOpacity
+                  key={item.label}
+                  onPress={() => handlePress(item)}
+                  style={[
+                    styles.item,
+                    index !== MENU_ITEMS.length - 1 && styles.border,
+                  ]}
                 >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Ionicons
+                    name={item.icon}
+                    size={18}
+                    color={isDanger ? "#FF5E7D" : "#8695A4"}
+                  />
+                  <Text style={[styles.text, isDanger && { color: "#FF5E7D" }]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </Pressable>
         </Pressable>
       </Modal>
@@ -132,7 +188,7 @@ const HeaderMenu = () => {
 
 export const TabNavigator = () => {
   const { user } = useContext(AuthContext);
-
+  console.log("User in TabNavigator:", user);
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
@@ -173,7 +229,7 @@ export const TabNavigator = () => {
     >
       <Tab.Screen
         name="Feed"
-        component={TinderPage}
+        component={HomeNavigator}
         options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
       />
       <Tab.Screen

@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const restoreSession = async () => {
     try {
       const token = await getToken();
-      console.log("Token data  ::: ", token);
+      console.log("Restoring session with token:", token);
 
       if (!token) return;
 

@@ -1,14 +1,33 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import TinderPage from "../screens/TinderPage";
-import Authentication from "../screens/Authentication";
+import Connections from "../screens/Connections";
+import Requests from "../screens/Requests";
+import ViewUserProfile from "../screens/ViewUserProfile";
 
-export const HomeNavigator = () => {
+export const HomeNavigator = ({ navigation }) => {
   const Stack = createStackNavigator();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Home" component={TinderPage} />
-      <Stack.Screen name="login" component={Authentication} />
+      {/* Main screen */}
+      <Stack.Screen name="FeedHome" component={TinderPage} />
+
+      {/* Secondary screens (tabs stay visible) */}
+      <Stack.Screen
+        name="Matches"
+        options={{ headerShown: true }}
+        component={Connections}
+      />
+      <Stack.Screen
+        name="Requests"
+        options={{ headerShown: true }}
+        component={Requests}
+      />
+      <Stack.Screen
+        name="ViewUserProfile"
+        options={{ headerShown: true }}
+        component={ViewUserProfile}
+      />
     </Stack.Navigator>
   );
 };

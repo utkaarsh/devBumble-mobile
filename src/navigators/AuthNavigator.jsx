@@ -2,6 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Authentication from "../screens/Authentication";
 import HomeScreen from "../screens/HomeScreen";
 import { Image, Text, View } from "react-native";
+import SignupForm from "../components/SignupForm";
 
 const AuthNavigator = () => {
   const Stack = createStackNavigator();
@@ -10,14 +11,14 @@ const AuthNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         sceneStyle: { backgroundColor: "#1D232A" },
-        headerStyle: { backgroundColor: "transparent" },
+        headerStyle: { backgroundColor: "black" },
         headerBackground: () => (
           <View
             style={{
               flex: 1,
               backgroundColor: "#15191E",
-              borderBottomLeftRadius: 20,
-              borderBottomRightRadius: 20,
+              // borderBottomLeftRadius: 20,
+              // borderBottomRightRadius: 20,
               overflow: "hidden",
             }}
           />
@@ -41,6 +42,7 @@ const AuthNavigator = () => {
     >
       <Stack.Screen name="login" component={Authentication} />
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Signup" component={SignupForm} />
     </Stack.Navigator>
   );
 };

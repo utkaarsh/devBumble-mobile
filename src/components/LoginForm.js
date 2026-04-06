@@ -14,8 +14,8 @@ import { saveToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
 
 const LoginForm = ({ onNavigateToSignup }) => {
-  const [email, setEmail] = useState("michael.martin3@example.in");
-  const [password, setPassword] = useState("hitler123");
+  const [email, setEmail] = useState("stella@utkarshranpise.com");
+  const [password, setPassword] = useState("StrongP@ssw0rd123");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -35,10 +35,22 @@ const LoginForm = ({ onNavigateToSignup }) => {
         emailId: email,
         password: password,
       });
-      await saveToken(res.data.token);
-      axios.defaults.headers.common["Authorization"] =
-        `Bearer ${res.data.token}`;
-      authContext.setUser(res.data);
+      const token = res.data?.token || res.data?.data?.token;
+      if (!token) throw new Error("Login response did not include token");
+      await saveToken(token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Prefer profile endpoint so we have the full user object (photoUrl, name, etc.)
+      let userData = null;
+      try {
+        const profile = await axios.get(`${path}/profile/view`);
+        userData = profile.data;
+      } catch (profileErr) {
+        // Fallback to API login data if profile call is unavailable.
+        userData = res.data.user || res.data;
+      }
+
+      authContext.setUser(userData);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Login failed";
       setErrorMessage(msg);
@@ -48,7 +60,7 @@ const LoginForm = ({ onNavigateToSignup }) => {
   };
 
   return (
-    <View className="flex-1  items-center justify-center px-6">
+    <View className="flex-1  items-center justify-center px-6 bg-black">
       {/* Card */}
       <View className="w-full bg-[#1D232A] rounded-2xl p-7 border border-[#252C35]">
         {/* Header */}

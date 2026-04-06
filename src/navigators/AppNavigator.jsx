@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import AuthContext from "../auth/context";
 import AuthNavigator from "./AuthNavigator";
 import { TabNavigator } from "./TabNavigator";
+import { HomeNavigator } from "./HomeNavigator";
 
 export default function AppNavigator() {
   const colorScheme = useColorScheme();
