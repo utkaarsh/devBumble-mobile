@@ -4,7 +4,6 @@ import api from "../utils/api";
 const DEFAULT_LIMIT = 10;
 
 const fetchFeed = async ({ pageParam = 1 }) => {
-  console.log("Hitting");
   const res = await api.get(
     `/user/feed/?page=${pageParam}&limit=${DEFAULT_LIMIT}`,
   );

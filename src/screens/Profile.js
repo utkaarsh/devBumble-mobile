@@ -5,7 +5,6 @@ import ProfileCard from "../components/ProfileCard";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
-  console.log("Profile of user :: ", user);
 
   return (
     <Screen className="flex-1 p-2 flex gap-5">

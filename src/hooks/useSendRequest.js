@@ -11,7 +11,6 @@ export const useSendRequest = () => {
   return useMutation({
     mutationFn: sendRequest,
     onSuccess: (data) => {
-      console.log("Request sent ::", data.message);
       queryClient.invalidateQueries({
         queryKey: ["feed"],
       });

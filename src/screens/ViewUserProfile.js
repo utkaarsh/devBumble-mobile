@@ -20,7 +20,6 @@ const ViewUserProfile = ({ route }) => {
       const res = await api.get(`/profile/view/${id}`);
       const checkRequest = res?.data?.hasRequested;
       if (checkRequest) setHasRequested(true);
-      console.log("Profile data :: ", res.data);
       setUser(res.data?.user);
     } catch (error) {
       console.error(

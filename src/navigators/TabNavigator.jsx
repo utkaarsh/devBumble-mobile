@@ -188,7 +188,6 @@ const HeaderMenu = () => {
 
 export const TabNavigator = () => {
   const { user } = useContext(AuthContext);
-  console.log("User in TabNavigator:", user);
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator

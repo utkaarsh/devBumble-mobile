@@ -16,7 +16,6 @@ const RequestBox = ({ user }) => {
   const handleDecision = async (id, action) => {
     try {
       const response = api.post(`/request/review/${action}/${id}`);
-      console.log("Response", (await response).data);
 
       if ((await response).data.success) {
         ToastAndroid.show(

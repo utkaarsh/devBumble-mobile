@@ -3,7 +3,6 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 
 const ListUsersCard = ({ item, renderActions }) => {
   const navigation = useNavigation();
-  console.log("IDS :: ", item._id);
   return (
     <View
       style={{

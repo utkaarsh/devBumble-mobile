@@ -311,12 +311,10 @@ const SignupForm = ({ onNavigateToLogin }) => {
       let userData = null;
       try {
         const profile = await api.get("/profile/view");
-        console.log("Profile data", profile.data);
         userData = profile.data;
       } catch (profileErr) {
         // Fallback to API login data if profile call is unavailable.
         userData = res.data.user || res.data;
-        console.log("User data not recieved", profileErr);
       }
 
       authContext.setUser(userData);

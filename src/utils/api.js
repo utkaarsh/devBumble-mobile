@@ -11,7 +11,6 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const token = await getToken();
-    console.log("Token generated for request:", config.url);
 
     if (!token) {
       console.warn("No token found for request:", config.url);

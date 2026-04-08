@@ -5,15 +5,12 @@ const feedSlice = createSlice({
   initialState: [],
   reducers: {
     getFeed: (state, action) => {
-      console.log("Hitted get feed");
-
       return action.payload;
     },
     removeUserFromFeed: (state, action) => {
-      console.log("Hitted remove feed", action.payload);
       console.log(
         "State Value ",
-        state.filter((user) => user._id !== action.payload)
+        state.filter((user) => user._id !== action.payload),
       );
 
       try {

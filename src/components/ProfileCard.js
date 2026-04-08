@@ -11,7 +11,6 @@ import { formatDate } from "../utils/utility";
 
 const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
   const user = data;
-  console.log("Data ", data);
 
   const sections = [
     {

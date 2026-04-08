@@ -5,12 +5,9 @@ const tokenSlice = createSlice({
   initialState: null,
   reducers: {
     getToken: (state, action) => {
-      console.log("Hitted get feed");
       return action.payload;
     },
     setToken: (state, action) => {
-      console.log("Token set on redux", action.payload);
-
       return action.payload;
     },
     clearToken: () => null,

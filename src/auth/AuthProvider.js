@@ -15,15 +15,13 @@ export const AuthProvider = ({ children }) => {
   const restoreSession = async () => {
     try {
       const token = await getToken();
-      console.log("Restoring session with token:", token);
 
       if (!token) return;
 
       const res = await api.get("/profile/view");
       setUser(res.data);
     } catch (error) {
-      console.log("Catch Error :: ", error.response?.data || error.message);
-      console.log("Token deleted called");
+      console.error("Catch Error :: ", error.response?.data || error.message);
       await deleteToken();
       setUser(null);
     } finally {
