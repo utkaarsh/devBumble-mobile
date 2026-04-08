@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AuthContext from "./context";
 import { getToken, deleteToken } from "./authTokenStorage";
-import axios from "axios";
-import { path } from "../utils/path";
 import { ActivityIndicator } from "react-native";
+import api from "../utils/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -20,9 +19,7 @@ export const AuthProvider = ({ children }) => {
 
       if (!token) return;
 
-      const res = await axios.get(`${path}/profile/view`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/profile/view");
       setUser(res.data);
     } catch (error) {
       console.log("Catch Error :: ", error.response?.data || error.message);

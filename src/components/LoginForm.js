@@ -12,9 +12,10 @@ import { path } from "../utils/path";
 import axios from "axios";
 import { saveToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
+import api from "../utils/api";
 
 const LoginForm = ({ onNavigateToSignup }) => {
-  const [email, setEmail] = useState("stella@utkarshranpise.com");
+  const [email, setEmail] = useState("justin@email.com");
   const [password, setPassword] = useState("StrongP@ssw0rd123");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,12 +39,11 @@ const LoginForm = ({ onNavigateToSignup }) => {
       const token = res.data?.token || res.data?.data?.token;
       if (!token) throw new Error("Login response did not include token");
       await saveToken(token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       // Prefer profile endpoint so we have the full user object (photoUrl, name, etc.)
       let userData = null;
       try {
-        const profile = await axios.get(`${path}/profile/view`);
+        const profile = await api.get("/profile/view");
         userData = profile.data;
       } catch (profileErr) {
         // Fallback to API login data if profile call is unavailable.

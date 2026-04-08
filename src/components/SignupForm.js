@@ -22,6 +22,7 @@ import StrengthBar from "./StrengthBar";
 import { saveToken } from "../auth/authTokenStorage";
 import { useNavigation } from "@react-navigation/native";
 import AuthContext from "../auth/context";
+import api from "../utils/api";
 
 // ─── Yup schemas per step ───────────────────────────────────────────────────
 const step1Schema = Yup.object({
@@ -306,11 +307,10 @@ const SignupForm = ({ onNavigateToLogin }) => {
       const token = res.data?.token || res.data?.data?.token;
       if (!token) throw new Error("Login response did not include token");
       await saveToken(token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       // Prefer profile endpoint so we have the full user object (photoUrl, name, etc.)
       let userData = null;
       try {
-        const profile = await axios.get(`${path}/profile/view`);
+        const profile = await api.get("/profile/view");
         console.log("Profile data", profile.data);
         userData = profile.data;
       } catch (profileErr) {

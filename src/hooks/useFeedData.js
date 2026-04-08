@@ -1,6 +1,4 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { path } from "../utils/path";
 import api from "../utils/api";
 
 const DEFAULT_LIMIT = 10;

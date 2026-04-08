@@ -15,12 +15,11 @@ api.interceptors.request.use(
 
     if (!token) {
       console.warn("No token found for request:", config.url);
-      return; // ✅ Don't block request if no token
+      return config;
     }
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
 
     return config;
   },

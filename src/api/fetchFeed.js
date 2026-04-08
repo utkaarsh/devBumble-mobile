@@ -1,15 +1,7 @@
-import axios from "axios";
-import { path } from "../utils/path";
-import { getToken } from "../auth/authTokenStorage";
+import api from "../utils/api";
 
 export const fetchFeed = async () => {
-  const token = await getToken();
-
-  const res = await axios.get(`${path}/user/feed`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await api.get("/user/feed");
 
   return res.data;
 };
