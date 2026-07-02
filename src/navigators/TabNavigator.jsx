@@ -1,11 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useContext, useState } from "react";
 import FeedIcon from "../svg/FeedIcon";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import Authentication from "../screens/Authentication";
+import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import { HomeNavigator } from "./HomeNavigator";
-import StarIcon from "../svg/StarIcon";
+import { SearchNavigator } from "./SearchNavigator";
 import {
   Image,
   Text,
@@ -14,10 +13,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import TinderPage from "../screens/TinderPage";
-import axios from "axios";
-import { path } from "../utils/path";
-import { deleteToken, getToken } from "../auth/authTokenStorage";
+import { deleteToken } from "../auth/authTokenStorage";
 import AuthContext from "../auth/context";
 import Profile from "../screens/Profile";
 import { useNavigation } from "@react-navigation/native";
@@ -235,8 +231,17 @@ export const TabNavigator = () => {
         name="Chat"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ size, color }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="chatbubble-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchNavigator}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="search-outline" size={24} color={color} />
           ),
         }}
       />

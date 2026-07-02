@@ -62,6 +62,12 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
             {user?.firstName} {user?.lastName}
           </Text>
 
+          {isFeedCard && (
+            <Text className="text-gray-400 text-sm">
+              {user?.distanceInKm ?? "Distance not available"} km away
+            </Text>
+          )}
+
           {user.emailId && (
             <Text className="text-gray-400 text-base">
               {user?.emailId ?? "Email not available"}

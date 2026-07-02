@@ -34,7 +34,13 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow DevBumble to use your location to keep nearby matches relevant."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

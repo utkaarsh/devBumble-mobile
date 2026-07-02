@@ -16,6 +16,7 @@ export default function Screen({ children, style, hasHeader = true }) {
     screen: {
       marginTop:
         !hasHeader && Platform.OS === "android" ? StatusBar.currentHeight : 0,
+      flex: 1,
     },
   });
 
