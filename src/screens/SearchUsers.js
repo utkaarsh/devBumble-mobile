@@ -223,12 +223,12 @@ const SearchUsers = ({ navigation }) => {
         </Text>
       </View>
 
-      <View className="mt-3 mx-2 flex-row items-center gap-2 rounded-xl border border-[#2F3740] bg-[#fff] px-3">
+      <View className="mt-3 mx-2 flex-row items-center gap-2 rounded-xl border border-[#2F3740] bg-[#15191E] px-3">
         <Ionicons name="search" size={20} color="#A6ADBB" />
         <TextInput
           autoCapitalize="none"
           autoCorrect={false}
-          className="min-h-12 flex-1 text-base text-[#000]"
+          className="min-h-12 flex-1 text-base text-[#fff]"
           onChangeText={setQuery}
           placeholder="Search developers"
           placeholderTextColor="#6F7A86"

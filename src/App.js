@@ -7,6 +7,7 @@ import "../global.css";
 import appStore from "./store/appStore";
 import { AuthProvider } from "./auth/AuthProvider";
 import AppNavigator from "./navigators/AppNavigator";
+import SocketProvider from "./socket/SocketProvider";
 
 const queryClient = new QueryClient();
 
@@ -16,9 +17,11 @@ export default function App() {
       <Provider store={appStore}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
+            <SocketProvider>
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+            </SocketProvider>
           </AuthProvider>
         </QueryClientProvider>
       </Provider>

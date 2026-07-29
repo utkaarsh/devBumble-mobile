@@ -6,6 +6,8 @@ import ListUsersCard from "../components/ListUsersCard";
 
 const Connections = ({ listType = "test", route, navigation }) => {
   const apiUrl = route?.params?.apiUrl;
+  console.log("API URL: ", apiUrl);
+
   const { data, loading, refreshing, loadMore, refresh } =
     usePaginatedList(apiUrl);
 

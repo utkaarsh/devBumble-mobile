@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import { HomeNavigator } from "./HomeNavigator";
 import { SearchNavigator } from "./SearchNavigator";
+import { ChatNavigator } from "./ChatNavigator";
 import {
   Image,
   Text,
@@ -223,19 +224,20 @@ export const TabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Feed"
-        component={HomeNavigator}
-        options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
-      />
-      <Tab.Screen
         name="Chat"
-        component={HomeScreen}
+        component={ChatNavigator}
         options={{
           tabBarIcon: ({ color }) => (
             <Ionicons name="chatbubble-outline" size={24} color={color} />
           ),
         }}
       />
+      <Tab.Screen
+        name="Feed"
+        component={HomeNavigator}
+        options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
+      />
+
       <Tab.Screen
         name="Search"
         component={SearchNavigator}

@@ -23,16 +23,16 @@ const ListUsersCard = ({ item, renderActions }) => {
           source={{ uri: item.photoUrl }}
           style={{ width: 50, height: 50, borderRadius: 25 }}
         />
-        <View>
+        <View className=" space-y-3">
           <Text
             style={{ color: "#fff", fontWeight: "bold" }}
             className="w-48 whitespace-normal break-words"
           >
             {item.firstName} {item.lastName}
           </Text>
-          <Text style={{ color: "#aaa" }}>
+          {/* <Text style={{ color: "#aaa" }}>
             {item.age}, {item.gender}
-          </Text>
+          </Text> */}
           <Text
             style={{ color: "#aaa", fontSize: 12 }}
             className="max-w-56 whitespace-normal break-words"

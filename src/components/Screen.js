@@ -7,7 +7,12 @@ import {
   View,
 } from "react-native";
 
-export default function Screen({ children, style, hasHeader = true }) {
+export default function Screen({
+  children,
+  style,
+  hasHeader = true,
+  className = "",
+}) {
   const styles = StyleSheet.create({
     safeArea: {
       flex: 1,
@@ -22,7 +27,9 @@ export default function Screen({ children, style, hasHeader = true }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.screen, style]}>{children}</View>
+      <View style={[styles.screen, style]} className={className}>
+        {children}
+      </View>
     </SafeAreaView>
   );
 }

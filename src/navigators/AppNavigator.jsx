@@ -13,6 +13,8 @@ import { HomeNavigator } from "./HomeNavigator";
 import { requestLocationPermission } from "../services/location/locationPermission";
 import { getCurrentLocation } from "../services/location/locationService";
 import { syncLocationToBackend } from "../services/location/locationSync";
+import { createStackNavigator } from "@react-navigation/stack";
+import ChatDetailScreen from "../screens/ChatDetailScreen";
 
 export default function AppNavigator() {
   const colorScheme = useColorScheme();
@@ -22,6 +24,15 @@ export default function AppNavigator() {
 
     initializeLocation();
   }, [user]);
+
+  const RootStack = createStackNavigator();
+
+  const RootTabs = () => (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="MainTabs" component={TabNavigator} />
+      <RootStack.Screen name="ChatDetail" component={ChatDetailScreen} />
+    </RootStack.Navigator>
+  );
 
   //initialize location tracking
   const initializeLocation = async () => {
@@ -46,7 +57,7 @@ export default function AppNavigator() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DarkTheme}>
       <StatusBar style="dark" backgroundColor="#D5D5D5" translucent={false} />
-      {user ? <TabNavigator /> : <AuthNavigator />}
+      {user ? <RootTabs /> : <AuthNavigator />}
     </ThemeProvider>
   );
 }
