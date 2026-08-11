@@ -17,7 +17,8 @@ import ListUsersCard from "../components/ListUsersCard";
 const ChatScreen = () => {
   const navigation = useNavigation();
   const { data = [], isLoading, isError, error } = useChatList();
-
+  const chats = data?.chats || [];
+  const suggestions = data?.suggestions || [];
   const renderItem = ({ item }) => {
     const fullName = [item.firstName, item.lastName].filter(Boolean).join(" ");
     const lastMessageText = item.lastMessage?.text || "No messages yet";
@@ -60,14 +61,6 @@ const ChatScreen = () => {
     );
   };
 
-  const {
-    data: suggestionsData,
-    loading,
-    refreshing,
-    loadMore,
-    refresh,
-  } = usePaginatedList("/user/connections");
-
   if (isLoading) {
     return (
       <Screen style={{ backgroundColor: "#15191E", justifyContent: "center" }}>
@@ -93,7 +86,7 @@ const ChatScreen = () => {
     >
       <View>
         <FlatList
-          data={data}
+          data={chats}
           keyExtractor={(item) => item.chatId}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 10 }}
@@ -107,17 +100,14 @@ const ChatScreen = () => {
           Suggestions
         </Text>
         <FlatList
-          data={suggestionsData}
+          data={suggestions}
           keyExtractor={(item, index) => item._id || index.toString()}
           renderItem={({ item }) => <ListUsersCard item={item} />}
-          onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          refreshing={refreshing}
-          onRefresh={refresh}
           ListFooterComponent={
-            loading ? <ActivityIndicator color="#fff" /> : null
+            isLoading ? <ActivityIndicator color="#fff" /> : null
           }
-          ListEmptyComponent={() => !loading && <View />}
+          ListEmptyComponent={() => <View />}
           contentContainerStyle={{ padding: 6 }}
         />
       </View>

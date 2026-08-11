@@ -8,6 +8,7 @@ import appStore from "./store/appStore";
 import { AuthProvider } from "./auth/AuthProvider";
 import AppNavigator from "./navigators/AppNavigator";
 import SocketProvider from "./socket/SocketProvider";
+import ToastProvider from "./supercomponents/ToastProvider";
 
 const queryClient = new QueryClient();
 
@@ -18,9 +19,11 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <SocketProvider>
-              <NavigationContainer>
-                <AppNavigator />
-              </NavigationContainer>
+              <ToastProvider>
+                <NavigationContainer>
+                  <AppNavigator />
+                </NavigationContainer>
+              </ToastProvider>
             </SocketProvider>
           </AuthProvider>
         </QueryClientProvider>

@@ -25,7 +25,7 @@ export const MAIN_COLORS = {
 
 export const ACTION_OFFSET = 100;
 
-export const CARD_HEIGHT = windowHeight * 0.7;
+export const CARD_HEIGHT = windowHeight * 0.73;
 export const CARD_WIDTH = windowWidth * 0.85;
 export const OUT_OF_SCREEN = windowWidth + 0.9 * windowWidth;
 

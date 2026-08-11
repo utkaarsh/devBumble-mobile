@@ -43,7 +43,7 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
     <ScrollView className={`p-2 mb-24 ${className}`}>
       {/* PROFILE HEADER */}
       <View
-        className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-4 rounded-2xl mt-10 mx-2 flex-row items-start`}
+        className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-2 rounded-2xl mt-10 mx-2 flex-row items-start`}
       >
         <View className="w-24 h-24 overflow-hidden bg-gray-500 rounded-full mr-4 items-center justify-center">
           {user?.photoUrl ? (

@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useMemo,
 } from "react";
-import { Animated, PanResponder, StyleSheet } from "react-native";
+import { Animated, PanResponder, Pressable, StyleSheet } from "react-native";
 import Choice from "./Choice";
 import {
   ACTION_OFFSET,
@@ -16,11 +16,13 @@ import {
 } from "../utils/constants";
 import ViewProfile from "./ProfileCard";
 import { useSendRequest } from "../hooks/useSendRequest";
+import { useNavigation } from "@react-navigation/native";
 
 const UserCard = forwardRef(function UserCard(
   { user, isFirst, tiltSign, onRemove },
   ref,
 ) {
+  const navigation = useNavigation();
   const swipe = useRef(new Animated.ValueXY()).current;
   const isSwiped = useRef(false);
   const isSwipingHorizontally = useRef(false);
@@ -165,11 +167,16 @@ const UserCard = forwardRef(function UserCard(
       style={[styles.container, isFirst && animatedCardStyle]}
       {...(isFirst ? panResponder.panHandlers : {})}
     >
-      <ViewProfile
-        data={user}
-        isFeedCard
-        isSwipingHorizontally={isSwipingHorizontally}
-      />
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => navigation.navigate("ViewUserProfile", { id: user._id })}
+      >
+        <ViewProfile
+          data={user}
+          isFeedCard
+          isSwipingHorizontally={isSwipingHorizontally}
+        />
+      </Pressable>
       {isFirst && renderChoice()}
     </Animated.View>
   );

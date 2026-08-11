@@ -224,6 +224,11 @@ export const TabNavigator = () => {
       }}
     >
       <Tab.Screen
+        name="Feed"
+        component={HomeNavigator}
+        options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
+      />
+      <Tab.Screen
         name="Chat"
         component={ChatNavigator}
         options={{
@@ -231,11 +236,6 @@ export const TabNavigator = () => {
             <Ionicons name="chatbubble-outline" size={24} color={color} />
           ),
         }}
-      />
-      <Tab.Screen
-        name="Feed"
-        component={HomeNavigator}
-        options={{ tabBarIcon: ({ color }) => <FeedIcon color={color} /> }}
       />
 
       <Tab.Screen

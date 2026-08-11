@@ -20,6 +20,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import SocketContext from "../socket/SocketContext";
 import { path } from "../utils/path";
 import api from "../utils/api";
+import { timeAgo } from "../utils/utility";
 
 const ChatDetailScreen = () => {
   const route = useRoute();
@@ -167,7 +168,7 @@ const ChatDetailScreen = () => {
   }, [socket, userId, otherUserId]);
 
   return (
-    <Screen style={{ backgroundColor: "#15191E" }}>
+    <Screen style={{ backgroundColor: "#000" }}>
       <View className="flex-row items-center px-4 py-3 border-b border-[#2A323B]">
         <Pressable onPress={() => navigation.goBack()} className="mr-3">
           <Text className="text-white text-xl">←</Text>
@@ -231,7 +232,7 @@ const ChatDetailScreen = () => {
                     </Text>
 
                     <Text className="ml-2 text-[10px] text-[#6F7A86]">
-                      {formatChatTimestamp(item.createdAt)}
+                      {timeAgo(item.createdAt)}
                     </Text>
                   </View>
 
