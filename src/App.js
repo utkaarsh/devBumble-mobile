@@ -9,25 +9,28 @@ import { AuthProvider } from "./auth/AuthProvider";
 import AppNavigator from "./navigators/AppNavigator";
 import SocketProvider from "./socket/SocketProvider";
 import ToastProvider from "./supercomponents/ToastProvider";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <Provider store={appStore}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <SocketProvider>
-              <ToastProvider>
-                <NavigationContainer>
-                  <AppNavigator />
-                </NavigationContainer>
-              </ToastProvider>
-            </SocketProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </Provider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <Provider store={appStore}>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <SocketProvider>
+                <ToastProvider>
+                  <NavigationContainer>
+                    <AppNavigator />
+                  </NavigationContainer>
+                </ToastProvider>
+              </SocketProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </Provider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

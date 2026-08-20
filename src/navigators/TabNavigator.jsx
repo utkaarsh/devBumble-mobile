@@ -19,6 +19,7 @@ import AuthContext from "../auth/context";
 import Profile from "../screens/Profile";
 import { useNavigation } from "@react-navigation/native";
 import api from "../utils/api";
+import { JobNavigator } from "./JobNavigator";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
@@ -223,6 +224,15 @@ export const TabNavigator = () => {
         tabBarStyle: { position: "absolute" },
       }}
     >
+      <Tab.Screen
+        name="Jobs"
+        component={JobNavigator}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="briefcase" size={24} color={color} />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Feed"
         component={HomeNavigator}
