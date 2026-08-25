@@ -30,6 +30,7 @@ const ChatDetailScreen = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  console.log("Parameter", route.params);
 
   if (!chat) {
     return (

@@ -19,6 +19,7 @@ import AuthContext from "../auth/context";
 import Profile from "../screens/Profile";
 import { useNavigation } from "@react-navigation/native";
 import api from "../utils/api";
+import NotificationFeed from "../screens/NotificationFeed";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
@@ -234,6 +235,15 @@ export const TabNavigator = () => {
         options={{
           tabBarIcon: ({ color }) => (
             <Ionicons name="chatbubble-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Notifications"
+        component={NotificationFeed}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="notifications" size={24} color={color} />
           ),
         }}
       />

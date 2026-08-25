@@ -85,6 +85,9 @@ const ChatScreen = () => {
     //   style={{ backgroundColor: "#15191E" }}
     >
       <View>
+        <Text className="text-white text-lg font-semibold mt-4 mb-2 px-4">
+          Messages
+        </Text>
         <FlatList
           data={chats}
           keyExtractor={(item) => item.chatId}
@@ -96,9 +99,11 @@ const ChatScreen = () => {
             </Text>
           }
         />
-        <Text className="text-white text-lg font-semibold mt-4 mb-2 px-4">
-          Suggestions
-        </Text>
+        {suggestions.length > 0 && (
+          <Text className="text-white text-lg font-semibold mt-4 mb-2 px-4">
+            Suggestions
+          </Text>
+        )}
         <FlatList
           data={suggestions}
           keyExtractor={(item, index) => item._id || index.toString()}

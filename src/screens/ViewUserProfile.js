@@ -1,27 +1,66 @@
 import React, { useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+} from "react-native";
+
 import Screen from "../components/Screen";
 import AuthContext from "../auth/context";
 import ProfileCard from "../components/ProfileCard";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import api from "../utils/api";
 import RequestBox from "../components/RequestBox";
-import { ScrollView } from "react-native";
+import api from "../utils/api";
 
 const ViewUserProfile = ({ route }) => {
   const [user, setUser] = useState(null);
+
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
   const [theirRequest, setTheirRequest] = useState(false);
   const [myRequest, setMyRequest] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const { user: currentUser } = useContext(AuthContext); // ✅ consumed INSIDE the provider
+
+  // Store the actual connection request ID.
+  const [requestId, setRequestId] = useState(null);
+
+  const { user: currentUser } = useContext(AuthContext);
 
   const { id } = route.params;
 
-  const getProfileData = async (id) => {
+  /* -------------------------------------------------------------------------- */
+  /*                             Fetch profile data                             */
+  /* -------------------------------------------------------------------------- */
+
+  const getProfileData = async (userId) => {
     try {
       setLoading(true);
-      const res = await api.get(`/profile/view/${id}`);
-      setUser(res.data?.data || null);
+
+      const res = await api.get(`/profile/view/${userId}`);
+
+      const profileData = res.data?.data;
+
+      setUser(profileData || null);
+
+      const connection = profileData?.connection;
+      const connectionStatus = profileData?.connectionStatus;
+
+      /*
+        Determine who sent the request.
+
+        If your backend returns ObjectIds, convert them to strings
+        before comparing them.
+      */
+
+      const fromUserId = connection?.fromUserId?._id || connection?.fromUserId;
+
+      const toUserId = connection?.toUserId?._id || connection?.toUserId;
+
+      const currentUserId = currentUser?._id;
+
       const theirRequest =
         (res.data?.data?.connection?.fromUserId === id &&
           res.data?.data?.connectionStatus === "interested") ||
@@ -30,148 +69,357 @@ const ViewUserProfile = ({ route }) => {
         (res.data?.data?.connection?.fromUserId === "me" &&
           res.data?.data?.connectionStatus === "interested") ||
         false;
-      const isConnected = res.data?.data?.connectionStatus === "accepted";
+
+      const connected = connectionStatus === "accepted";
+
       setTheirRequest(theirRequest);
       setMyRequest(myRequest);
-      setIsConnected(isConnected);
-      console.log(
-        "Connection log",
-        res.data?.data?.connection || "No connection data",
-      );
+      setIsConnected(connected);
+
+      // Save request ID for cancel/review actions
+      setRequestId(connection?._id || null);
     } catch (error) {
       console.error(
-        "Error fetching profile data: ",
+        "Error fetching profile data:",
         error?.response?.data?.message || error.message,
       );
-      setLoading(false);
+
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    getProfileData(id);
-  }, [id]);
+    if (id && currentUser?._id) {
+      getProfileData(id);
+    }
+  }, [id, currentUser?._id]);
+
+  /* -------------------------------------------------------------------------- */
+  /*                          Send connection request                           */
+  /* -------------------------------------------------------------------------- */
 
   const sendConnectionRequest = async () => {
     try {
-      setLoading(true);
+      setActionLoading(true);
+
       const res = await api.post(`/request/send/interested/${id}`);
-      console.log("Connection request sent: ", res.data);
+
+      console.log("Connection request sent:", res.data);
+
+      /*
+        Ideally your backend should return the created
+        connection request.
+
+        Example:
+        {
+          data: {
+            _id: "..."
+          }
+        }
+      */
+
+      const createdRequest = res.data?.data || res.data?.connectionRequest;
+
+      if (createdRequest?._id) {
+        setRequestId(createdRequest._id);
+      }
+
       setMyRequest(true);
+      setTheirRequest(false);
+      setIsConnected(false);
     } catch (error) {
       console.error(
-        "Error sending connection request: ",
+        "Error sending connection request:",
         error?.response?.data?.message || error.message,
       );
+
+      Alert.alert(
+        "Unable to connect",
+        error?.response?.data?.message ||
+          "Something went wrong while sending the request.",
+      );
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                           Cancel connection request                        */
+  /* -------------------------------------------------------------------------- */
+
+  const cancelConnectionRequest = () => {
+    if (!requestId) {
+      Alert.alert("Error", "Connection request ID is missing.");
+
+      return;
+    }
+
+    Alert.alert(
+      "Cancel request?",
+      `Cancel your connection request to ${user?.firstName}?`,
+      [
+        {
+          text: "Keep Request",
+          style: "cancel",
+        },
+        {
+          text: "Cancel Request",
+          style: "destructive",
+          onPress: performCancelConnectionRequest,
+        },
+      ],
+    );
+  };
+
+  const performCancelConnectionRequest = async () => {
+    try {
+      setActionLoading(true);
+
+      await api.delete(`/request/cancel/${requestId}`);
+
+      setMyRequest(false);
+      setRequestId(null);
+    } catch (error) {
+      console.error(
+        "Error cancelling connection request:",
+        error?.response?.data?.message || error.message,
+      );
+
+      Alert.alert(
+        "Unable to cancel",
+        error?.response?.data?.message ||
+          "Something went wrong while cancelling the request.",
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                              Remove connection                             */
+  /* -------------------------------------------------------------------------- */
+
+  const removeConnection = () => {
+    Alert.alert(
+      "Remove connection?",
+      `Are you sure you want to remove ${user?.firstName} from your connections?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: performRemoveConnection,
+        },
+      ],
+    );
+  };
+
+  const performRemoveConnection = async () => {
+    try {
+      setActionLoading(true);
+
+      await api.delete(`/request/remove/${id}`);
+
+      setIsConnected(false);
+      setMyRequest(false);
+      setTheirRequest(false);
+      setRequestId(null);
+    } catch (error) {
+      console.error(
+        "Error removing connection:",
+        error?.response?.data?.message || error.message,
+      );
+
+      Alert.alert(
+        "Unable to remove",
+        error?.response?.data?.message ||
+          "Something went wrong while removing the connection.",
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Loading                                   */
+  /* -------------------------------------------------------------------------- */
+
+  if (loading) {
+    return (
+      <Screen className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" />
+      </Screen>
+    );
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    UI                                      */
+  /* -------------------------------------------------------------------------- */
+
   return (
-    <Screen className="flex-1 p-2 flex gap-5">
-      {loading ? (
-        <ActivityIndicator style={{ flex: 1 }} />
-      ) : user ? (
-        <ScrollView className="p-2 mb-24 flex-1">
-          <View className="bg-[#15191E] rounded-2xl  px-5 py-2 mb-3 pb-5 shadow-sm border ">
-            <Text className="text-lg font-semibold text-gray-900">
+    <Screen className="flex-1 p-2">
+      {user ? (
+        <ScrollView
+          className="mb-24 flex-1 p-2"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ---------------------------------------------------------------- */}
+          {/* Connection Status                                                */}
+          {/* ---------------------------------------------------------------- */}
+
+          <View className="mb-3 rounded-2xl bg-[#15191E] px-5 py-4 pb-5">
+            <Text className="text-lg font-semibold text-white">
               Connection Status
             </Text>
 
-            {/* Incoming Request */}
+            {/* -------------------------------------------------------------- */}
+            {/* Incoming Request                                               */}
+            {/* -------------------------------------------------------------- */}
+
             {theirRequest && (
               <>
-                <Text className="text-gray-500 mt-1 mb-4">
+                <Text className="mb-4 mt-1 text-gray-400">
                   {user.firstName} wants to connect with you.
                 </Text>
 
-                <RequestBox user={user} />
+                <RequestBox user={user} requestId={requestId} />
               </>
             )}
 
-            {/* No Connection */}
+            {/* -------------------------------------------------------------- */}
+            {/* No Connection                                                  */}
+            {/* -------------------------------------------------------------- */}
+
             {!theirRequest && !myRequest && !isConnected && (
               <>
-                <View className="flex-row items-center mt-1">
-                  <View className="w-3 h-3 rounded-full bg-gray-400 mr-2" />
-                  <Text className="text-gray-700 font-medium">
+                <View className="mt-2 flex-row items-center">
+                  <View className="mr-2 h-3 w-3 rounded-full bg-gray-400" />
+
+                  <Text className="font-medium text-gray-300">
                     Not Connected
                   </Text>
                 </View>
 
-                <Text className="text-gray-500 mt-2 mb-5">
+                <Text className="mb-5 mt-2 text-gray-400">
                   Send a connection request to start networking.
                 </Text>
 
                 <TouchableOpacity
+                  disabled={actionLoading}
                   onPress={sendConnectionRequest}
-                  className="bg-blue-600 rounded-xl py-3"
+                  className={`items-center rounded-xl py-3 ${
+                    actionLoading ? "bg-blue-900" : "bg-blue-600"
+                  }`}
                 >
-                  <Text className="text-center text-white font-semibold">
-                    + Connect
-                  </Text>
+                  {actionLoading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="font-semibold text-white">+ Connect</Text>
+                  )}
                 </TouchableOpacity>
               </>
             )}
 
-            {/* Pending */}
+            {/* -------------------------------------------------------------- */}
+            {/* Pending Request                                                */}
+            {/* -------------------------------------------------------------- */}
+
             {myRequest && !isConnected && (
               <>
-                <View className="flex-row items-center mt-1">
-                  <View className="w-3 h-3 rounded-full bg-yellow-500 mr-2" />
-                  <Text className="text-yellow-700 font-medium">
+                <View className="mt-2 flex-row items-center">
+                  <View className="mr-2 h-3 w-3 rounded-full bg-yellow-500" />
+
+                  <Text className="font-medium text-yellow-400">
                     Request Pending
                   </Text>
                 </View>
 
-                <Text className="text-gray-500 mt-2">
+                <Text className="mt-2 text-gray-400">
                   Your connection request has been sent. You'll be notified once
                   it's accepted.
                 </Text>
 
-                <TouchableOpacity className="mt-5 border border-yellow-500 rounded-xl py-3">
-                  <Text className="text-center text-yellow-700 font-semibold">
-                    Cancel Request
-                  </Text>
+                <TouchableOpacity
+                  disabled={actionLoading}
+                  onPress={cancelConnectionRequest}
+                  className="mt-5 rounded-xl border border-yellow-500 py-3"
+                >
+                  {actionLoading ? (
+                    <ActivityIndicator color="#EAB308" />
+                  ) : (
+                    <Text className="text-center font-semibold text-yellow-500">
+                      Cancel Request
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </>
             )}
 
-            {/* Connected */}
+            {/* -------------------------------------------------------------- */}
+            {/* Connected                                                      */}
+            {/* -------------------------------------------------------------- */}
+
             {isConnected && (
               <>
-                <View className="flex-row items-center mt-1">
-                  <View className="w-3 h-3 rounded-full bg-green-500 mr-2" />
-                  <Text className="text-green-700 font-medium">Connected</Text>
+                <View className="mt-2 flex-row items-center">
+                  <View className="mr-2 h-3 w-3 rounded-full bg-green-500" />
+
+                  <Text className="font-medium text-green-400">Connected</Text>
                 </View>
 
-                <Text className="text-gray-500 mt-2 mb-5">
+                <Text className="mb-5 mt-2 text-gray-400">
                   You're connected and can now interact with each other.
                 </Text>
 
                 <View className="flex-row">
-                  <TouchableOpacity className="flex-1 bg-blue-600 rounded-xl py-3 mr-2">
-                    <Text className="text-center text-white font-semibold">
+                  {/* Message */}
+
+                  <TouchableOpacity
+                    className="mr-2 flex-1 rounded-xl bg-blue-600 py-3"
+                    onPress={() => {
+                      // Navigate to chat
+                    }}
+                  >
+                    <Text className="text-center font-semibold text-white">
                       Message
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity className="flex-1 border border-red-300 rounded-xl py-3 ml-2">
-                    <Text className="text-center text-red-500 font-semibold">
-                      Remove
-                    </Text>
+                  {/* Remove */}
+
+                  <TouchableOpacity
+                    disabled={actionLoading}
+                    onPress={removeConnection}
+                    className="ml-2 flex-1 rounded-xl border border-red-500 py-3"
+                  >
+                    {actionLoading ? (
+                      <ActivityIndicator color="#EF4444" />
+                    ) : (
+                      <Text className="text-center font-semibold text-red-500">
+                        Remove
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </>
             )}
           </View>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Profile                                                          */}
+          {/* ---------------------------------------------------------------- */}
+
           <ProfileCard data={user} />
         </ScrollView>
       ) : (
-        <Text className="text-center text-gray-500">
-          User profile not available
-        </Text>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-gray-500">User profile not available</Text>
+        </View>
       )}
     </Screen>
   );
