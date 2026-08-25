@@ -16,7 +16,12 @@
         "foregroundImage": "./assets/images/devBumble.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.utkaarsh.DevBumble"
+      "package": "com.utkaarsh.DevBumble",
+       "googleServicesFile": "./google-services.json",
+       "notification": {
+        "icon": "./assets/images/devBumble.png",
+        "color": "#000000"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -35,6 +40,7 @@
         }
       ],
       "expo-secure-store",
+      "expo-notifications",
       [
         "expo-location",
         {

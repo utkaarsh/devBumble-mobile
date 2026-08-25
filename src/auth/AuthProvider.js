@@ -3,6 +3,11 @@ import AuthContext from "./context";
 import { getToken, deleteToken } from "./authTokenStorage";
 import { ActivityIndicator } from "react-native";
 import api from "../utils/api";
+import * as Notifications from "expo-notifications";
+import {
+  registerForPushNotificationsAsync,
+  syncPushTokenWithBackend,
+} from "../services/notifications/pushNotifications";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -11,6 +16,33 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     restoreSession();
   }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const notificationSubscription =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log("Notification received:", notification.request.content);
+      });
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(
+          "Notification opened:",
+          response.notification.request.content,
+        );
+      });
+
+    registerForPushNotificationsAsync()
+      .then(syncPushTokenWithBackend)
+      .catch((error) => {
+        console.warn("Push notification setup failed:", error.message);
+      });
+
+    return () => {
+      notificationSubscription.remove();
+      responseSubscription.remove();
+    };
+  }, [user]);
 
   const restoreSession = async () => {
     try {
