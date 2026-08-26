@@ -4,16 +4,19 @@ import { normalizeImageUrl } from "../utils/chatUtils";
 
 const fetchChatList = async () => {
   const response = await api.get("/chats");
-
   const chats = (response.data?.data || []).map((chat) => ({
     ...chat,
 
     photoUrl: normalizeImageUrl(chat.photoUrl),
 
-    lastMessage: {
-      ...chat.lastMessage,
-      createdAt: chat.lastMessage?.createdAt || null,
-    },
+    lastMessage: chat.lastMessage
+      ? {
+          ...chat.lastMessage,
+          createdAt: chat.lastMessage.createdAt || null,
+        }
+      : null,
+
+    lastMessageAt: chat.lastMessageAt || null,
   }));
 
   const suggestions = (response.data?.suggestions || []).map((user) => ({

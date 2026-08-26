@@ -1,8 +1,44 @@
 import { useNavigation } from "@react-navigation/native";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
-const ListUsersCard = ({ item, renderActions }) => {
+const ListUsersCard = ({ item, renderActions, onPress }) => {
   const navigation = useNavigation();
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress(item);
+      return;
+    }
+
+    // Default behavior for existing components
+    navigation.navigate("ViewUserProfile", {
+      id: item._id,
+    });
+  };
+
+  const ProfileImage = ({ uri, size = 50 }) => {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          overflow: "hidden",
+          backgroundColor: "#2A323B",
+        }}
+      >
+        <Image
+          source={{ uri }}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  };
+
   return (
     <View
       style={{
@@ -16,25 +52,31 @@ const ListUsersCard = ({ item, renderActions }) => {
       }}
     >
       <TouchableOpacity
-        onPress={() => navigation.navigate("ViewUserProfile", { id: item._id })}
-        style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+        onPress={handlePress}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+        }}
       >
-        <Image
-          source={{ uri: item.photoUrl }}
-          style={{ width: 50, height: 50, borderRadius: 25 }}
-        />
-        <View className=" space-y-3">
+        <ProfileImage uri={item.photoUrl} size={50} />
+
+        <View className="space-y-3">
           <Text
-            style={{ color: "#fff", fontWeight: "bold" }}
+            style={{
+              color: "#fff",
+              fontWeight: "bold",
+            }}
             className="w-48 whitespace-normal break-words"
           >
             {item.firstName} {item.lastName}
           </Text>
-          {/* <Text style={{ color: "#aaa" }}>
-            {item.age}, {item.gender}
-          </Text> */}
+
           <Text
-            style={{ color: "#aaa", fontSize: 12 }}
+            style={{
+              color: "#aaa",
+              fontSize: 12,
+            }}
             className="max-w-56 whitespace-normal break-words"
           >
             {item.about}
@@ -42,7 +84,6 @@ const ListUsersCard = ({ item, renderActions }) => {
         </View>
       </TouchableOpacity>
 
-      {/* Injected from parent */}
       {renderActions?.(item)}
     </View>
   );

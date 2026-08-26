@@ -14,7 +14,7 @@ import ProfileCard from "../components/ProfileCard";
 import RequestBox from "../components/RequestBox";
 import api from "../utils/api";
 
-const ViewUserProfile = ({ route }) => {
+const ViewUserProfile = ({ route, navigation }) => {
   const [user, setUser] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -103,23 +103,7 @@ const ViewUserProfile = ({ route }) => {
   const sendConnectionRequest = async () => {
     try {
       setActionLoading(true);
-
       const res = await api.post(`/request/send/interested/${id}`);
-
-      console.log("Connection request sent:", res.data);
-
-      /*
-        Ideally your backend should return the created
-        connection request.
-
-        Example:
-        {
-          data: {
-            _id: "..."
-          }
-        }
-      */
-
       const createdRequest = res.data?.data || res.data?.connectionRequest;
 
       if (createdRequest?._id) {
@@ -381,9 +365,9 @@ const ViewUserProfile = ({ route }) => {
 
                   <TouchableOpacity
                     className="mr-2 flex-1 rounded-xl bg-blue-600 py-3"
-                    onPress={() => {
-                      // Navigate to chat
-                    }}
+                    onPress={() =>
+                      navigation.navigate("ChatDetail", { chat: user })
+                    }
                   >
                     <Text className="text-center font-semibold text-white">
                       Message

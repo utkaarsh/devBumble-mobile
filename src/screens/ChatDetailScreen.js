@@ -30,7 +30,6 @@ const ChatDetailScreen = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
-  console.log("Parameter", route.params);
 
   if (!chat) {
     return (
@@ -44,7 +43,7 @@ const ChatDetailScreen = () => {
   const firstName = chat.firstName;
   const avatarSource = chat.photoUrl ? { uri: chat.photoUrl } : null;
   const userId = user?._id;
-  const otherUserId = chat?.userId;
+  const otherUserId = chat?.userId ?? chat?._id;
   const socket = useContext(SocketContext);
 
   const sendMessage = () => {
@@ -62,15 +61,18 @@ const ChatDetailScreen = () => {
     } catch (error) {
       setLoading(false);
       console.error(error.message || error.msg || error);
+    } finally {
+      setLoading(false);
     }
+
     setNewMessage("");
   };
 
   const fetchChatMessages = async () => {
     try {
-      const res = await api.get(`/chat/${otherUserId}`);
+      const res = await api.get(`/chat/${otherUserId}/messages`);
 
-      const chatMessages = res.data.messages.map((msg) => ({
+      const chatMessages = res.data?.data?.map((msg) => ({
         _id: msg._id,
         senderId: msg.senderId._id,
         firstName: msg.senderId.firstName,
@@ -84,15 +86,14 @@ const ChatDetailScreen = () => {
 
       setMessages(chatMessages);
     } catch (err) {
-      console.log(err);
+      console.log("Error Fetching chat details", err?.message || err);
     }
   };
   const flatListRef = useRef(null);
 
   // Fallback: still attempt a scroll whenever the messages array changes.
   useEffect(() => {
-    if (!messages.length) return;
-
+    if (!messages.length) return console.log("No messages", messages);
     requestAnimationFrame(() => {
       flatListRef.current?.scrollToEnd({
         animated: true,
@@ -106,65 +107,110 @@ const ChatDetailScreen = () => {
     fetchChatMessages();
   }, [userId, otherUserId]);
 
+  // ==================================================
+  // JOIN / LEAVE CHAT ROOM
+  // ==================================================
+
   useEffect(() => {
-    if (!socket) return;
-    if (messages.length > 0) {
-      socket.emit("mark-as-seen", { userId, otherUserId });
-    }
+    if (!socket || !userId || !otherUserId) return;
+
+    socket.emit("join-chat", { userId, otherUserId });
+
+    return () => {
+      socket.emit("leave-chat", { userId, otherUserId });
+    };
+  }, [socket, userId, otherUserId]);
+
+  useEffect(() => {
+    if (!socket || !userId || !otherUserId) return;
     const handleSeen = ({ seenBy }) => {
+      // Only update when the other user marked our messages as seen
+      if (seenBy !== otherUserId) return;
+
       setMessages((prev) => {
-        const lastMyIndex = [...prev]
-          .map((msg) => msg.senderId)
-          .lastIndexOf(userId);
+        let changed = false;
 
-        if (lastMyIndex === -1) return prev;
+        const updated = prev.map((msg) => {
+          if (msg.senderId === userId && !msg.seen) {
+            changed = true;
+            return {
+              ...msg,
+              seen: true,
+            };
+          }
 
-        return prev.map((msg, index) =>
-          index === lastMyIndex ? { ...msg, seen: true } : msg,
-        );
+          return msg;
+        });
+
+        // Very important:
+        // If nothing actually changed, return the same array reference.
+        if (!changed) {
+          return prev;
+        }
+
+        return updated;
       });
     };
 
     socket.on("messagesSeen", handleSeen);
 
-    return () => socket.off("messagesSeen", handleSeen);
-  }, [socket, messages, socket, userId, otherUserId]);
+    return () => {
+      socket.off("messagesSeen", handleSeen);
+    };
+  }, [socket, userId, otherUserId]);
 
   useEffect(() => {
-    if (!socket) return;
-
-    socket.emit("join-chat", {
-      userId,
-      otherUserId,
-      firstName,
-    });
+    if (!socket || !userId || !otherUserId) {
+      return console.log("return log messageReceived");
+    }
 
     const handleMessage = (message) => {
+      console.log("messageReceived:", message);
+
       setLoading(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          // Temporary client-side id until the backend sends the real _id.
-          // Date.now() alone can collide if two messages land in the same
-          // millisecond, which breaks FlatList's keyExtractor. Add a random
-          // suffix to guarantee uniqueness.
-          _id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          senderId: message.senderId,
-          firstName: message.firstName,
-          lastName: message.lastName,
-          photoUrl: message.photoUrl,
-          text: message.text,
-          createdAt: message.createdAt,
-          delivered: true,
-          seen: false,
-        },
-      ]);
+
+      setMessages((prev) => {
+        // ------------------------------------------
+        // Prevent duplicate messages
+        // ------------------------------------------
+
+        const alreadyExists = prev.some(
+          (msg) => msg._id?.toString() === message._id?.toString(),
+        );
+
+        if (alreadyExists) {
+          return prev;
+        }
+
+        return [
+          ...prev,
+          {
+            _id: message._id,
+
+            senderId: message.senderId,
+
+            firstName: message.firstName,
+
+            lastName: message.lastName,
+
+            photoUrl: message.photoUrl,
+
+            text: message.text,
+
+            createdAt: message.createdAt,
+
+            delivered: message.delivered ?? true,
+
+            seen: message.seen ?? false,
+          },
+        ];
+      });
     };
 
-    socket.on("messageRecieved", handleMessage);
+    socket.on("messageReceived", handleMessage);
 
     return () => {
-      socket.off("messageRecieved", handleMessage);
+      socket.off("messageReceived", handleMessage);
     };
   }, [socket, userId, otherUserId]);
 

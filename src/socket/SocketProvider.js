@@ -20,13 +20,28 @@ const SocketProvider = ({ children }) => {
     // User logged in
     const socketInstance = createSocketConnection();
 
+    const registerUser = () => {
+      socketInstance.emit("register-user", { userId: user._id });
+      console.log("✅ Socket connected + registered", user._id);
+    };
+
+    // Fires on first connect AND every reconnect — room membership
+    // does not survive a disconnect, so this must re-run each time.
+    socketInstance.on("connect", registerUser);
+
+    socketInstance.on("disconnect", (reason) => {
+      console.log("❌ Socket disconnected:", reason);
+    });
+
+    socketInstance.on("connect_error", (err) => {
+      console.log("⚠️ Socket connect_error:", err.message);
+    });
+
     setSocket(socketInstance);
 
-    console.log("✅ Socket connected");
-
     return () => {
+      socketInstance.off("connect", registerUser);
       socketInstance.disconnect();
-      console.log("❌ Socket disconnected");
     };
   }, [user?._id]);
 
