@@ -29,10 +29,8 @@ const ListUsersCard = ({ item, renderActions, onPress }) => {
       >
         <Image
           source={{ uri }}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
+          className="w-full h-auto"
+          style={{ width: "100%", height: "100%" }}
           resizeMode="contain"
         />
       </View>

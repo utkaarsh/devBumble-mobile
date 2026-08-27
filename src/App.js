@@ -9,6 +9,7 @@ import { AuthProvider } from "./auth/AuthProvider";
 import AppNavigator from "./navigators/AppNavigator";
 import SocketProvider from "./socket/SocketProvider";
 import ToastProvider from "./supercomponents/ToastProvider";
+import ChatListSync from "./context/ChatListSync";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ export default function App() {
             <SocketProvider>
               <ToastProvider>
                 <NavigationContainer>
+                  <ChatListSync />
                   <AppNavigator />
                 </NavigationContainer>
               </ToastProvider>

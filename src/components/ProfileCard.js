@@ -49,8 +49,9 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
           {user?.photoUrl ? (
             <Image
               source={{ uri: user.photoUrl }}
-              className="w-full h-full"
-              resizeMode="cover"
+              className="w-full h-auto"
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain"
             />
           ) : (
             <Ionicons name="person-circle-sharp" size={74} color="white" />

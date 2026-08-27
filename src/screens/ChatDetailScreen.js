@@ -160,6 +160,20 @@ const ChatDetailScreen = () => {
   }, [socket, userId, otherUserId]);
 
   useEffect(() => {
+    if (!socket || !userId || !otherUserId || !chat?.chatId) {
+      console.log("mark-as-seen not returned");
+      return;
+    }
+
+    socket.emit("mark-as-seen", {
+      userId,
+      otherUserId,
+      chatId: chat.chatId, // not chat._id
+    });
+    console.log("mark-as-seen hitted", chat.chatId);
+  }, [socket, userId, otherUserId, chat?.chatId]);
+
+  useEffect(() => {
     if (!socket || !userId || !otherUserId) {
       return console.log("return log messageReceived");
     }
@@ -221,7 +235,14 @@ const ChatDetailScreen = () => {
           <Text className="text-white text-xl">←</Text>
         </Pressable>
         {avatarSource ? (
-          <Image source={avatarSource} className="w-12 h-12 rounded-full" />
+          <View className="w-12 h-12">
+            <Image
+              source={avatarSource}
+              className="w-full h-auto"
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain"
+            />
+          </View>
         ) : (
           <View className="w-12 h-12 rounded-full bg-[#2A323B] items-center justify-center">
             <Text className="text-white font-semibold">

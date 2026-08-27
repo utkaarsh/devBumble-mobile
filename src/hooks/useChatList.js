@@ -1,21 +1,20 @@
+// hooks/useChatList.js
 import { useQuery } from "@tanstack/react-query";
 import api from "../utils/api";
 import { normalizeImageUrl } from "../utils/chatUtils";
 
-const fetchChatList = async () => {
+export const fetchChatList = async () => {
+  // NEW: exported
   const response = await api.get("/chats");
   const chats = (response.data?.data || []).map((chat) => ({
     ...chat,
-
     photoUrl: normalizeImageUrl(chat.photoUrl),
-
     lastMessage: chat.lastMessage
       ? {
           ...chat.lastMessage,
           createdAt: chat.lastMessage.createdAt || null,
         }
       : null,
-
     lastMessageAt: chat.lastMessageAt || null,
   }));
 
@@ -24,10 +23,7 @@ const fetchChatList = async () => {
     photoUrl: normalizeImageUrl(user.photoUrl),
   }));
 
-  return {
-    chats,
-    suggestions,
-  };
+  return { chats, suggestions };
 };
 
 const useChatList = () => {

@@ -33,6 +33,28 @@ const ChatScreen = () => {
   const chats = data?.chats || [];
   const suggestions = data?.suggestions || [];
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnreadCountUpdated = ({ chatId, unreadCount }) => {
+      queryClient.setQueryData(["chat-list"], (current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          chats: current.chats.map((chat) =>
+            chat.chatId?.toString() === chatId?.toString()
+              ? { ...chat, unreadCount }
+              : chat,
+          ),
+        };
+      });
+    };
+
+    socket.on("unreadCountUpdated", handleUnreadCountUpdated);
+    return () => socket.off("unreadCountUpdated", handleUnreadCountUpdated);
+  }, [socket, queryClient]);
+
   // ==================================================
   // HANDLE REAL-TIME CHAT LIST UPDATES
   // ==================================================
@@ -108,13 +130,11 @@ const ChatScreen = () => {
     const userId = currentUser?._id;
     const lastMessageText = item.lastMessage?.text || "No messages yet";
 
-    // Bold only when the last message is:
-    // 1. Incoming (sent by the OTHER person, not me), AND
-    // 2. Not yet seen by me
     const isMine =
       item.lastMessage?.senderId?.toString() === userId?.toString();
 
     const isUnread = !isMine && !(item.lastMessage?.seen ?? false);
+    const unreadCount = item.unreadCount || 0;
 
     const avatarSource = item.photoUrl ? { uri: item.photoUrl } : null;
 
@@ -124,11 +144,14 @@ const ChatScreen = () => {
         className="flex-row items-center px-4 py-3 border-b border-[#2A323B]"
       >
         {avatarSource ? (
-          <Image
-            source={avatarSource}
-            className="w-14 h-14 rounded-full"
-            resizeMode="cover"
-          />
+          <View className="w-14 h-14">
+            <Image
+              source={avatarSource}
+              className="w-full h-auto"
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain"
+            />
+          </View>
         ) : (
           <View className="w-14 h-14 rounded-full bg-[#2A323B] items-center justify-center">
             <Text className="text-white text-lg font-semibold">
@@ -143,19 +166,33 @@ const ChatScreen = () => {
               {fullName}
             </Text>
 
+            {/* Timestamp restored to what it should show */}
             <Text className="text-[#8A94A6] text-xs">
               {formatChatTimestamp(item.lastMessage?.createdAt)}
             </Text>
           </View>
 
-          <Text
-            className={`text-sm mt-1 ${
-              isUnread ? "font-bold text-white" : "text-[#8A94A6] font-normal"
-            }`}
-            numberOfLines={1}
-          >
-            {isMine ? `You: ${lastMessageText}` : lastMessageText}
-          </Text>
+          <View className="flex-row items-center justify-between mt-1">
+            <Text
+              className={`text-sm flex-1 ${
+                isUnread && unreadCount
+                  ? "font-bold text-white"
+                  : "text-[#8A94A6] font-normal"
+              }`}
+              numberOfLines={1}
+            >
+              {isMine ? `You: ${lastMessageText}` : lastMessageText}
+            </Text>
+
+            {/* Per-row unread badge */}
+            {unreadCount > 0 && (
+              <View className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-[#4F8EF7] items-center justify-center">
+                <Text className="text-white text-xs font-bold">
+                  {unreadCount > 4 ? "4+" : unreadCount}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </Pressable>
     );

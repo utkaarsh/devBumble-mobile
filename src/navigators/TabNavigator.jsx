@@ -20,6 +20,7 @@ import Profile from "../screens/Profile";
 import { useNavigation } from "@react-navigation/native";
 import api from "../utils/api";
 import NotificationFeed from "../screens/NotificationFeed";
+import useUnreadTotal from "../hooks/useUnreadTotal";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
@@ -187,6 +188,8 @@ const HeaderMenu = () => {
 export const TabNavigator = () => {
   const { user } = useContext(AuthContext);
   const Tab = createBottomTabNavigator();
+  const unreadTotal = useUnreadTotal();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -236,6 +239,7 @@ export const TabNavigator = () => {
           tabBarIcon: ({ color }) => (
             <Ionicons name="chatbubble-outline" size={24} color={color} />
           ),
+          tabBarBadge: unreadTotal > 0 ? unreadTotal : undefined,
         }}
       />
       <Tab.Screen
