@@ -26,25 +26,35 @@ import api from "../utils/api";
 
 // ─── Yup schemas per step ───────────────────────────────────────────────────
 const step1Schema = Yup.object({
-  fullName: Yup.string()
+  firstName: Yup.string()
     .min(2, "Name too short")
-    .required("Full name is required"),
-  username: Yup.string()
-    .min(3, "At least 3 characters")
-    .matches(/^[a-zA-Z0-9_]+$/, "Letters, numbers & underscores only")
-    .required("Username is required"),
+    .required("First name is required"),
+  lastName: Yup.string()
+    .min(2, "Name too short")
+    .required("Last name is required"),
 });
 
 const step2Schema = Yup.object({
-  email: Yup.string()
+  emailId: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
-  phone: Yup.string()
-    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit number")
-    .required("Phone number is required"),
+  gender: Yup.string().required("Gender is required"),
+  age: Yup.number()
+    .typeError("Enter a valid age")
+    .integer("Age must be a whole number")
+    .min(18, "You must be at least 18")
+    .max(120, "Enter a valid age")
+    .required("Age is required"),
 });
 
 const step3Schema = Yup.object({
+  skills: Yup.array()
+    .min(1, "Select at least one skill")
+    .required("Skills are required"),
+  interests: Yup.array()
+    .min(1, "Select at least one interest")
+    .required("Interests are required"),
+  experience: Yup.string().required("Experience is required"),
   password: Yup.string()
     .min(8, "At least 8 characters")
     .matches(/[A-Z]/, "Include at least one uppercase letter")
@@ -183,7 +193,6 @@ const Step3 = (props) => {
         label="Experience"
         fieldKey="experience"
         value={props.values.experience}
-        error={props.errors.experience}
         type="dropdown"
         options={[
           "Fresher",

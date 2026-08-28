@@ -253,10 +253,16 @@ const ViewUserProfile = ({ route, navigation }) => {
           showsVerticalScrollIndicator={false}
         >
           {/* ---------------------------------------------------------------- */}
+          {/* Profile                                                          */}
+          {/* ---------------------------------------------------------------- */}
+
+          <ProfileCard data={user} />
+
+          {/* ---------------------------------------------------------------- */}
           {/* Connection Status                                                */}
           {/* ---------------------------------------------------------------- */}
 
-          <View className="mb-3 rounded-2xl bg-[#15191E] px-5 py-4 pb-5">
+          <View className="my-5 mx-4 rounded-2xl bg-[#15191E] px-5 py-4 pb-5">
             <Text className="text-lg font-semibold text-white">
               Connection Status
             </Text>
@@ -393,12 +399,6 @@ const ViewUserProfile = ({ route, navigation }) => {
               </>
             )}
           </View>
-
-          {/* ---------------------------------------------------------------- */}
-          {/* Profile                                                          */}
-          {/* ---------------------------------------------------------------- */}
-
-          <ProfileCard data={user} />
         </ScrollView>
       ) : (
         <View className="flex-1 items-center justify-center">

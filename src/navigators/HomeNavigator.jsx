@@ -25,7 +25,7 @@ export const HomeNavigator = ({ navigation }) => {
       />
       <Stack.Screen
         name="ViewUserProfile"
-        options={{ headerShown: true }}
+        options={{ headerShown: false }}
         component={ViewUserProfile}
       />
     </Stack.Navigator>
