@@ -12,11 +12,11 @@ const Profile = () => {
     setEditProfile(!editProfile);
   };
   return (
-    <Screen className="flex-1 p-2 flex gap-2">
+    <Screen className=" p-2 flex gap-2">
       {!editProfile && (
         <TouchableOpacity
           onPress={() => handleEdit()}
-          className="w-48 self-center h-12 mt-12 bg-[#15191E] border border-gray-700 flex-row justify-center mx-2 rounded-lg items-center "
+          className="w-48 self-center h-12 mt-4 bg-[#15191E] border border-gray-700 flex-row justify-center mx-2 rounded-lg items-center "
         >
           <Text className="text-center text-white text-lg">Edit Profile</Text>
         </TouchableOpacity>

@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.get("/profile/view");
       setUser(res.data);
     } catch (error) {
-      console.error("Catch Error :: ", error.response?.data || error.message);
+      console.log("Catch Error :: ", error.response?.data || error.message);
       await deleteToken();
       setUser(null);
     } finally {

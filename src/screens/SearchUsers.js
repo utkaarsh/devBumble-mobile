@@ -29,10 +29,14 @@ const SearchResultCard = ({ item, onPress }) => {
       onPress={onPress}
     >
       {item.photoUrl ? (
-        <Image
-          source={{ uri: item.photoUrl }}
-          className="h-14 w-14 rounded-full bg-[#2F3740]"
-        />
+        <View className="w-12 h-12 bg-black rounded-full overflow-hidden">
+          <Image
+            source={{ uri: item.photoUrl }}
+            className="w-full h-auto"
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="contain"
+          />
+        </View>
       ) : (
         <View className="h-14 w-14 items-center justify-center rounded-full bg-[#2F3740]">
           <Ionicons name="person" size={28} color="#A6ADBB" />

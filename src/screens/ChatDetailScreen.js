@@ -235,7 +235,7 @@ const ChatDetailScreen = () => {
           <Text className="text-white text-xl">←</Text>
         </Pressable>
         {avatarSource ? (
-          <View className="w-12 h-12">
+          <View className="w-12 h-12 rounded-full overflow-hidden">
             <Image
               source={avatarSource}
               className="w-full h-auto"

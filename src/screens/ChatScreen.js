@@ -135,6 +135,8 @@ const ChatScreen = () => {
 
     const isUnread = !isMine && !(item.lastMessage?.seen ?? false);
     const unreadCount = item.unreadCount || 0;
+    console.log("Unread count ", unreadCount);
+    console.log(" is Unread ", isUnread);
 
     const avatarSource = item.photoUrl ? { uri: item.photoUrl } : null;
 
@@ -144,7 +146,7 @@ const ChatScreen = () => {
         className="flex-row items-center px-4 py-3 border-b border-[#2A323B]"
       >
         {avatarSource ? (
-          <View className="w-14 h-14">
+          <View className="w-14 h-14 rounded-full overflow-hidden">
             <Image
               source={avatarSource}
               className="w-full h-auto"
@@ -175,13 +177,13 @@ const ChatScreen = () => {
           <View className="flex-row items-center justify-between mt-1">
             <Text
               className={`text-sm flex-1 ${
-                isUnread && unreadCount
+                unreadCount && !isMine > 0
                   ? "font-bold text-white"
                   : "text-[#8A94A6] font-normal"
               }`}
               numberOfLines={1}
             >
-              {isMine ? `You: ${lastMessageText}` : lastMessageText}
+              {isMine ? `${lastMessageText}` : lastMessageText}
             </Text>
 
             {/* Per-row unread badge */}

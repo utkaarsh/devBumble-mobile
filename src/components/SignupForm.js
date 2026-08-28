@@ -139,7 +139,7 @@ const Step2 = (props) => (
     <Field
       {...props}
       label="Age"
-      icon="call-outline"
+      icon="person"
       placeholder="24"
       fieldKey="age"
       value={props.values.age}
@@ -184,10 +184,17 @@ const Step3 = (props) => {
         fieldKey="experience"
         value={props.values.experience}
         error={props.errors.experience}
-        touched={props.touched.experience}
-        placeholder="e.g. 2 years at XYZ"
+        type="dropdown"
+        options={[
+          "Fresher",
+          "1-2 years",
+          "2-3 years",
+          "3-4 years",
+          "4-5 years",
+          "5+ years",
+        ]}
+        placeholder="e.g. 2-3 years"
         icon="briefcase-outline"
-        keyboardType="default"
       />
       <Field
         {...props}
@@ -353,13 +360,13 @@ const SignupForm = ({ onNavigateToLogin }) => {
             firstName: "",
             lastName: "",
             emailId: "",
-            password: "StrongP@ssw0rd123",
-            confirmPassword: "StrongP@ssw0rd123",
+            password: "",
+            confirmPassword: "",
             gender: "Male",
             age: "24",
-            skills: ["React", "Node.js"],
-            interests: ["Web Dev", "AI"],
-            experience: "3.5 years at Google",
+            skills: [],
+            interests: [],
+            experience: "",
             about:
               "Cool developer looking to connect and collaborate on exciting projects!",
           }}

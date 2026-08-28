@@ -23,13 +23,13 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
       label: "Experience",
       value: user?.experience ?? "No experience information available.",
     },
-    {
-      iconName: "location-on",
-      label: "Location",
-      value: user?.location
-        ? `${user.location.coordinates[1]}, ${user.location.coordinates[0]}`
-        : "No location information available.",
-    },
+    // {
+    //   iconName: "location-on",
+    //   label: "Location",
+    //   value: user?.location
+    //     ? `${user.location.coordinates[1]}, ${user.location.coordinates[0]}`
+    //     : "No location information available.",
+    // },
     {
       iconName: "calendar-today",
       label: "Member Since",
@@ -40,10 +40,10 @@ const ViewProfile = ({ data, className = "", isFeedCard = false }) => {
   ];
 
   return (
-    <ScrollView className={`p-2 mb-24 ${className}`}>
+    <ScrollView className={`p-2 mb-2 ${className}`}>
       {/* PROFILE HEADER */}
       <View
-        className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-2 rounded-2xl mt-10 mx-2 flex-row items-start`}
+        className={`${!isFeedCard ? "bg-[#15191E]" : "bg-black"} p-2 rounded-2xl mt-4 mx-2 flex-row items-start`}
       >
         <View className="w-24 h-24 overflow-hidden bg-gray-500 rounded-full mr-4 items-center justify-center">
           {user?.photoUrl ? (
