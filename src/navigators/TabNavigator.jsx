@@ -21,6 +21,7 @@ import { useNavigation } from "@react-navigation/native";
 import api from "../utils/api";
 import NotificationFeed from "../screens/NotificationFeed";
 import useUnreadTotal from "../hooks/useUnreadTotal";
+import { clearLastLocation } from "../services/location/locationSync";
 
 const HeaderMenu = () => {
   const { setUser } = useContext(AuthContext);
@@ -35,6 +36,7 @@ const HeaderMenu = () => {
       console.error("Logout error:", err.message);
     } finally {
       await deleteToken();
+      await clearLastLocation();
       setUser(null);
     }
   };

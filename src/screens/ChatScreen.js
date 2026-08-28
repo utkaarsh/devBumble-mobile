@@ -63,8 +63,6 @@ const ChatScreen = () => {
     if (!socket) return;
 
     const handleChatUpdated = (updatedChat) => {
-      console.log("Chat list updated:", updatedChat);
-
       queryClient.setQueryData(["chat-list"], (currentData) => {
         if (!currentData) {
           return {

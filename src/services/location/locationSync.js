@@ -3,6 +3,10 @@ import api from "../../utils/api";
 
 const LAST_LOCATION_KEY = "LAST_LOCATION";
 
+export const clearLastLocation = async () => {
+  await AsyncStorage.removeItem(LAST_LOCATION_KEY);
+};
+
 const hasLocationChanged = (oldLoc, newLoc) => {
   if (!oldLoc) return true;
 
@@ -13,7 +17,7 @@ const hasLocationChanged = (oldLoc, newLoc) => {
   return latDiff > 0.001 || longDiff > 0.001;
 };
 
-export const syncLocationToBackend = async (location) => {
+export const syncLocationToBackend = async (location, force = false) => {
   try {
     const oldLocationString = await AsyncStorage.getItem(LAST_LOCATION_KEY);
 
@@ -21,16 +25,10 @@ export const syncLocationToBackend = async (location) => {
       ? JSON.parse(oldLocationString)
       : null;
 
-    if (!hasLocationChanged(oldLocation, location)) {
+    if (!force && !hasLocationChanged(oldLocation, location)) {
       console.log("Location unchanged", oldLocation);
       return;
     }
-
-    console.log("Location cords", {
-      latitude: location.latitude,
-      longitude: location.longitude,
-    });
-    console.log("Location hitting");
 
     await api.put("/users/location", {
       latitude: location.latitude,
@@ -38,8 +36,6 @@ export const syncLocationToBackend = async (location) => {
     });
 
     await AsyncStorage.setItem(LAST_LOCATION_KEY, JSON.stringify(location));
-
-    console.log("Location Synced");
   } catch (err) {
     console.log("Location Sync Error:", err.message);
   }

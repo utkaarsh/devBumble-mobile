@@ -161,7 +161,6 @@ const ChatDetailScreen = () => {
 
   useEffect(() => {
     if (!socket || !userId || !otherUserId || !chat?.chatId) {
-      console.log("mark-as-seen not returned");
       return;
     }
 
@@ -170,7 +169,6 @@ const ChatDetailScreen = () => {
       otherUserId,
       chatId: chat.chatId, // not chat._id
     });
-    console.log("mark-as-seen hitted", chat.chatId);
   }, [socket, userId, otherUserId, chat?.chatId]);
 
   useEffect(() => {
@@ -179,8 +177,6 @@ const ChatDetailScreen = () => {
     }
 
     const handleMessage = (message) => {
-      console.log("messageReceived:", message);
-
       setLoading(false);
 
       setMessages((prev) => {

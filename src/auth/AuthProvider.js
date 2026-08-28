@@ -8,6 +8,7 @@ import {
   registerForPushNotificationsAsync,
   syncPushTokenWithBackend,
 } from "../services/notifications/pushNotifications";
+import { clearLastLocation } from "../services/location/locationSync";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -62,8 +63,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await deleteToken();
-    setUser(null);
+    try {
+      await deleteToken();
+    } finally {
+      await clearLastLocation();
+      setUser(null);
+    }
   };
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />;

@@ -48,7 +48,7 @@ export default function AppNavigator() {
 
       if (!location) return;
 
-      await syncLocationToBackend(location);
+      await syncLocationToBackend(location, true);
     } catch (err) {
       console.log("Init Location Error:", err);
     }

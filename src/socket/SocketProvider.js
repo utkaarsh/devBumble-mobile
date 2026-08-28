@@ -22,7 +22,7 @@ const SocketProvider = ({ children }) => {
 
     const registerUser = () => {
       socketInstance.emit("register-user", { userId: user._id });
-      console.log("✅ Socket connected + registered", user._id);
+      console.log("✅ Socket connected");
     };
 
     // Fires on first connect AND every reconnect — room membership

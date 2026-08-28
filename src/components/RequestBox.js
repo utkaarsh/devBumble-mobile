@@ -40,14 +40,14 @@ const RequestBox = ({ user }) => {
   return (
     <View
       style={{ backgroundColor: appColors.secondary }}
-      className="p-4  rounded-lg shadow m-4"
+      className="p-4  rounded-lg shadow m-2"
     >
-      <Text className="text-gray-100 text-base">
+      {/* <Text className="text-gray-100 text-base">
         {user?.firstName} wants to connect with you
-      </Text>
+      </Text> */}
       <View
         style={{ width: col10 }}
-        className="flex-row items-center justify-between relative gap-4 my-2 pt-3 mx-4 "
+        className="flex-row items-center justify-center relative gap-4 my-2 pt-3 mx-4 "
       >
         <ActionButton
           label="Accept"

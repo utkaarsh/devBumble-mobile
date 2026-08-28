@@ -9,14 +9,16 @@ const ActionButton = ({
   <TouchableOpacity
     onPress={onPress}
     style={{
-      backgroundColor: color,
+      // backgroundColor: "#000",
       paddingVertical: 8,
-      paddingHorizontal: 16,
+      paddingHorizontal: 12,
       borderRadius: 5,
+      borderColor: color,
+      borderWidth: 1,
     }}
     className={className}
   >
-    <Text style={{ color: "#fff" }}>{label}</Text>
+    <Text style={{ color: color }}>{label}</Text>
   </TouchableOpacity>
 );
 

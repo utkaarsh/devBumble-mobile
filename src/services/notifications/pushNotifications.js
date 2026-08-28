@@ -12,12 +12,6 @@ Notifications.setNotificationHandler({
 });
 
 export async function registerForPushNotificationsAsync() {
-  console.log("\n");
-  console.log("====================================");
-  console.log("\n");
-
-  console.log("function called : registerForPushNotificationsAsync");
-
   if (Platform.OS === "web") {
     console.log("Push notifications are not supported on web");
     return null;
@@ -34,15 +28,11 @@ export async function registerForPushNotificationsAsync() {
 
   const permissions = await Notifications.getPermissionsAsync();
 
-  console.log("permission status:", permissions.status);
-
   let finalStatus = permissions.status;
 
   if (finalStatus !== "granted") {
     const requested = await Notifications.requestPermissionsAsync();
     finalStatus = requested.status;
-
-    console.log("requested permission:", finalStatus);
   }
 
   if (finalStatus !== "granted") {
@@ -50,33 +40,24 @@ export async function registerForPushNotificationsAsync() {
     return null;
   }
 
-  console.log("Notification permission granted");
-
   const projectId =
     Constants.expoConfig?.extra?.eas?.projectId ||
     Constants.easConfig?.projectId;
-
-  console.log("Expo project ID:", projectId);
 
   if (!projectId) {
     console.error("Expo project ID not found");
     return null;
   }
-  console.log("Before token call ");
   let token;
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync({
       projectId,
     });
     token = tokenData;
-    console.log("Expo push token:", token);
   } catch (error) {
     console.error("Expo push token error", error);
   }
 
-  console.log("\n");
-  console.log("====================================");
-  console.log("\n");
   return token?.data ?? null;
 }
 
